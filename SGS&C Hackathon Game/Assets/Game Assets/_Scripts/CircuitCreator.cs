@@ -21,6 +21,7 @@ public class CircuitCreator : MonoBehaviour
     public RectTransform canvasTransform;
     public Vector2 startPos;
     public Vector2 endPos;
+    public int currentDir;
 
 
     private void Start()
@@ -147,11 +148,11 @@ public class CircuitCreator : MonoBehaviour
             {
                 Cell cell = gridCells[i][j];
 
-                foreach (var wire in cell.currentWires)
+                for (int k = cell.currentWires.Count - 1; k >= 0; k--)
                 {
-                    if (wire == null)
+                    if (cell.currentWires[k] == null)
                     {
-                        cell.currentWires.Remove(wire);
+                        cell.currentWires.RemoveAt(k);
                     }
                 }
             }
@@ -162,8 +163,23 @@ public class CircuitCreator : MonoBehaviour
     {
         if ((endPos - startPos).magnitude >= cellSize)
         {
+            if (currentEndCell == null || currentStartCell.connection[currentDir] || currentEndCell.connection[(currentDir + 2) % 4])
+            {
+                Destroy(currentWire);
+                return;
+            }
+
             if (currentEndCell != null && !currentEndCell.currentWires.Contains(currentWire))
                 currentEndCell.currentWires.Add(currentWire);
+
+            // Save Wire in cells
+
+            currentStartCell.connection[currentDir] = true;
+            currentEndCell.connection[(currentDir + 2) % 4] = true;
+
+
+            endPos = currentEndCell.image.GetComponent<RectTransform>().position;
+            UpdateLine();
 
             StartWire(currentEndCell);
         }
@@ -183,10 +199,10 @@ public class CircuitCreator : MonoBehaviour
 
         endPos = canvasTransform.TransformPoint(localMousePos);
 
-        UpdateLine(startPos, endPos);
+        UpdateLine();
     }
 
-    public void UpdateLine(Vector2 startPos, Vector2 endPos)
+    public void UpdateLine()
     {
         if (currentWire == null) return;
 
@@ -194,24 +210,26 @@ public class CircuitCreator : MonoBehaviour
 
         Vector2 delta = endPos - startPos;
 
-        // Snap to the dominant direction (X or Y)
+        // ===== Snap
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
         {
             // Horizontal line
             endPos = new Vector2(endPos.x, startPos.y);
             currentEndCell = currentStartCell.adjcell[ delta.x > 0 ? 0 : 2 ];
+            currentDir = delta.x > 0 ? 0 : 2;
         }
         else
         {
             // Vertical line
             endPos = new Vector2(startPos.x, endPos.y);
             currentEndCell = currentStartCell.adjcell[ delta.y > 0 ? 1 : 3 ];
+            currentDir = delta.y > 0 ? 1 : 3;
         }
 
         Vector2 direction = endPos - startPos;
         float distance = direction.magnitude;
 
-        rect.sizeDelta = new Vector2(distance, 15f); // Thickness
+        rect.sizeDelta = new Vector2(distance, 15f);
         rect.pivot = new Vector2(0, 0.5f);
         rect.position = startPos;
 
@@ -222,15 +240,23 @@ public class CircuitCreator : MonoBehaviour
 
     internal void StartWire(Cell cell)
     {
+        if (cell == null || wireGameobject == null || cellParent == null)
+        {
+            return;
+        }
+
         currentWire = Instantiate(wireGameobject, cellParent.transform);
         currentStartCell = cell;
         currentEndCell = null;
         endPos = startPos;
 
 
-        if (currentWire != null && !cell.currentWires.Contains(currentWire))
+        if (!cell.currentWires.Contains(currentWire))
+        {
             cell.currentWires.Add(currentWire);
+        }
     }
+
 
     internal void EndWire()
     {
@@ -241,6 +267,53 @@ public class CircuitCreator : MonoBehaviour
             currentEndCell = null;
         }
     }
+
+    internal void HandleRightClick(Cell cell)
+    {
+        Vector2 cellPos = cell.image.GetComponent<RectTransform>().position;
+
+        // Convert mouse to world position relative to canvas
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasTransform,
+            Input.mousePosition,
+            null, // Assuming Screen Space - Overlay
+            out Vector2 localMousePos
+        );
+
+        Vector2 worldMousePos = canvasTransform.TransformPoint(localMousePos);
+        Vector2 delta = worldMousePos - (Vector2)cellPos;
+
+        int dir;
+
+        if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
+        {
+            dir = delta.x > 0 ? 0 : 2; 
+        }
+        else
+        {
+            dir = delta.y > 0 ? 1 : 3;
+        }
+
+
+        Cell adj = cell.adjcell[dir];
+        if (adj != null && cell.connection[dir])
+        {
+            cell.connection[dir] = false;
+            adj.connection[(dir + 2) % 4] = false;
+
+            // Destroy wire between them
+            foreach (var wire in cell.currentWires.ToArray())
+            {
+                if (adj.currentWires.Contains(wire))
+                {
+                    cell.currentWires.Remove(wire);
+                    adj.currentWires.Remove(wire);
+                    if (wire != null) Destroy(wire);
+                }
+            }
+        }
+    }
+
 }
 
 public class Cell
@@ -292,9 +365,16 @@ public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
     public void OnPointerDown(PointerEventData eventData)
     {
         cell.clickStarted = true;
-        circuitCreator.isDragging = true;
 
-        circuitCreator.StartWire(cell);
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            circuitCreator.isDragging = true;
+            circuitCreator.StartWire(cell);
+        }
+        else if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            circuitCreator.HandleRightClick(cell);
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
