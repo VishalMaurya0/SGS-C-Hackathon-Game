@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,6 +11,7 @@ public class CircuitCreator : MonoBehaviour
     public GameObject cellParent;
     public GameObject image;
     public GameObject wireGameobject;
+    public TMP_Text textPrefab;
     public float cellSize;
 
     [Header("Click &  Drag Behaviour")]
@@ -22,6 +23,12 @@ public class CircuitCreator : MonoBehaviour
     public Vector2 startPos;
     public Vector2 endPos;
     public int currentDir;
+
+    [Header("For Slower Update")]
+    private float updateInterval = 0f; // seconds
+    private float timer = 0f;
+
+
 
 
     private void Start()
@@ -44,7 +51,7 @@ public class CircuitCreator : MonoBehaviour
             gridCells.Add(new List<Cell>());
             for (int j = 0; j < CircuitGeneratorSO.columns_MakeItOdd; j++)
             {
-                gridCells[i].Add(new Cell(false, i, j));
+                gridCells[i].Add(new Cell(0));
             }
         }
 
@@ -61,6 +68,10 @@ public class CircuitCreator : MonoBehaviour
                 Cell cell = gridCells[i][j];
                 cell.image = cellImage; 
                 cell.button = cellImage.AddComponent<Button>();
+
+                //intantiate text
+                cell.text = cell.image.GetComponentInChildren<TMP_Text>();
+                cell.text.text = "0";
                 
                 // Set the size of the RectTransform
                 RectTransform rect = cell.image.GetComponent<RectTransform>();
@@ -134,6 +145,14 @@ public class CircuitCreator : MonoBehaviour
 
     void Update()
     {
+        timer += Time.deltaTime;
+
+        if (timer < updateInterval)
+        {
+            return;
+        }
+        timer = 0f;
+
         if (isDragging && currentWire != null && currentStartCell != null)
         {
             StartLineAndUpdation();
@@ -155,13 +174,14 @@ public class CircuitCreator : MonoBehaviour
             {
                 Cell cell = gridCells[i][j];
 
-                if (cell.value)
+                if (cell.value != 0)
                 {
                     cell.image.GetComponent<Image>().color = Color.red;
                 }else
                 {
                     cell.image.GetComponent<Image>().color = Color.grey;
                 }
+                cell.text.text = $"{cell.value}";
             }
         }
     }
@@ -233,65 +253,83 @@ public class CircuitCreator : MonoBehaviour
             {
                 Cell cell = gridCells[i][j];
 
-                if (!cell.value)
+                if (cell.value == 0)               //if cell is not on
                 {
+                    if (cell.isSource)
+                    {
+                        cell.value = 100;
+                        continue;
+                    }                         //not source
                     for (int k = 0; k < cell.powerDir.Count; k++)
                     {
-                        cell.powerDir[k] = 0;
-                    }
-                    continue;
-                }
-                if (cell.isSource) continue;
+                        if (cell.powerDir[k] == -1) continue;          // and also giving power not taking
+                        cell.powerDir[k] = 0;                      // then remove
 
-
-                //check if cell is getting power
-
-
-                if (cell.powerDir.Contains(-1))
-                {
-                    List<int> indexes = new List<int>();
-                    for (int k = 0; k < 4; k++)
-                    {
-                        if (cell.powerDir[k] == -1)
+                        Cell neighbor = cell.adjcell[k];
+                        if (neighbor != null)
                         {
-                            indexes.Add(k);
+                            neighbor.powerDir[(k + 2) % 4] = 0;
                         }
                     }
+                }
 
-                    bool normal = false;
-                    for (int k = 0; k < indexes.Count; k++)
-                    {
-                        if (cell.adjcell[indexes[k]].value)
-                            normal = true;
-                    }
+                if (cell.isSource) continue;
 
-                    if (!normal)
+                bool receivingPower = false;              // if cell is not source
+                int value = 0;
+                for (int k = 0; k < cell.powerDir.Count; k++)
+                {
+                    if (cell.powerDir[k] == -1 && cell.adjcell[k].value != 0 && cell.value < cell.adjcell[k].value)            // not getting power from a turned on cell higher than that
                     {
-                        cell.value = false;
-                        continue;
+                        receivingPower = true;
+                        value = cell.adjcell[k].value - 1;
+                        break;
+                    }else if (cell.powerDir[k] == -1 && cell.adjcell[k].value != 0)
+                    {
+                        cell.powerDir[k] = 0;
+                        cell.adjcell[k].powerDir[(k + 2) % 4] = 0;
                     }
+                }
+
+                if (!receivingPower)
+                {
+                    cell.value = 0;
                 }else
                 {
-                    cell.value = false;
+                    cell.value = value;
                 }
 
-
-                    cell.image.GetComponent<Image>().color = Color.red;
-                for (int k = 0; k < cell.connection.Count; k++)
+                for (int k = 0; k < 4; k++)  //now check if new connection is made to give power
                 {
-                    bool val = cell.connection[k];
-                    if (val)
+                    if (cell.connection[k] && cell.adjcell[k].value != 0 && cell.powerDir[k] != 1)
                     {
-                        cell.adjcell[k].value = val;
-                        cell.adjcell[k].powerDir[(k + 2) % 4] = -1;
-                        cell.powerDir[k] = 1;
+                        cell.powerDir[k] = -1;
+                        cell.adjcell[k].powerDir[(k + 2) % 4] = 1;
+                        cell.value = cell.adjcell[k].value - 1;
                     }
                 }
-                
             }
         }
     }
 
+
+    //private void CheckIfCellIsGettingPower(Cell cell)
+    //{
+    //    for (int i = 0; i < 4; i++)
+    //    {
+    //        Cell adjCell = cell.adjcell[i];
+
+    //        if (cell.powerDir[i] != -1) continue;
+    //        if (adjCell.value)
+    //        {
+
+    //        }else
+    //        {
+    //            cell.powerDir[i] = 0;
+    //            adjCell.powerDir[(i + 2) % 4] = 0;
+    //        }
+    //    }
+    //}
 
     public void UpdateLine()
     {
@@ -411,27 +449,25 @@ public class CircuitCreator : MonoBehaviour
 
 public class Cell
 {
-    public bool value;
-    public int indexX;
-    public int indexY;
-    public GameObject image;
-    public List<Cell> adjcell; // 0-right, 1-up...
+    //Values
+    public int value;
+    public bool isSource;
     public List<bool> connection; // 0-noConnection, 1-connection
     public List<int> powerDir; // 0-noConnection, 1-fromThisCell, -1-toThisCell
-    public Button button;
     public List<GameObject> currentWires;
-    public bool isSource;
+    
+    //References
+    public GameObject image;
+    public TMP_Text text;
+    public List<Cell> adjcell; // 0-right, 1-up...
+    public Button button;
 
     //Register Clicking
     public bool clickStarted = false;
-    public bool clickEnded = false;
-    public bool hovered = false;
 
-    public Cell(bool value, int indexX, int indexY)
+    public Cell(int value)
     {
         this.value = value;
-        this.indexX = indexX;
-        this.indexY = indexY;
         adjcell = new List<Cell>();
         connection = new List<bool>();
         powerDir = new List<int>();
@@ -448,7 +484,7 @@ public class Cell
 }
 
 
-public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
+public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
     public Cell cell;
     public CircuitCreator circuitCreator;
@@ -480,19 +516,12 @@ public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
         {
 
         }
-        cell.hovered = true;
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        cell.hovered = false;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         if (cell.clickStarted)
         {
-            cell.clickEnded = true;
             circuitCreator.EndWire();
         }
 
