@@ -18,7 +18,7 @@ MonoBehaviour:
     prefab: {fileID: 6075607189977428417, guid: 82887f96a6d87744081ec62e65a314e7, type: 3}
   - gateType: 1
     noOfInputs: 2
-    prefab: {fileID: 0}
+    prefab: {fileID: 6075607189977428417, guid: fc2c9256a75748146a0b5d8c19c3bced, type: 3}
   - gateType: 2
     noOfInputs: 2
     prefab: {fileID: 0}

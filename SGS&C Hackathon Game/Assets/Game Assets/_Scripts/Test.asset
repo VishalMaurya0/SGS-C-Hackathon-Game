@@ -17,6 +17,6 @@ MonoBehaviour:
   Output: 00010001010001000100
   gateOptions:
   - gateType: 0
-    amount: 1
+    amount: 6
   - gateType: 1
-    amount: 2
+    amount: 1

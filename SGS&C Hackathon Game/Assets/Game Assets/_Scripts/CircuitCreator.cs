@@ -73,7 +73,12 @@ public class CircuitCreator : MonoBehaviour
                 gridCells[i].Add(new Cell(0));
             }
         }
-        gateOptions = new List<GateOption>(CircuitGeneratorSO.gateOptions);
+        for (int i = 0; i < CircuitGeneratorSO.gateOptions.Count; i++)
+        {
+            gateOptions.Add(new GateOption());
+            gateOptions[i].gateType = CircuitGeneratorSO.gateOptions[i].gateType;
+            gateOptions[i].amount = CircuitGeneratorSO.gateOptions[i].amount;
+        }
 
         InitializeGates();
 
@@ -599,6 +604,12 @@ public class CircuitCreator : MonoBehaviour
         {
             NotGateFuntion(cell);
         }
+        
+        if (cell.gate == gates.and)
+        {
+            AndGateFuntion(cell);
+        }
+        
     
         void NotGateFuntion(Cell cell)
         {
@@ -615,6 +626,27 @@ public class CircuitCreator : MonoBehaviour
             {
                 cell.value = val;
             }else
+            {
+                cell.value = 0;
+            }
+        }
+
+        void AndGateFuntion(Cell cell)
+        {
+            int val = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
+                {
+                    val++;
+                }
+            }
+
+            if (val >= 2)
+            {
+                cell.value = 50;
+            }
+            else
             {
                 cell.value = 0;
             }
