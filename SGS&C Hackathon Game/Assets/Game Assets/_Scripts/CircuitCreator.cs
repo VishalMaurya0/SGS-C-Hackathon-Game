@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,22 +9,40 @@ using UnityEngine.UI;
 public class CircuitCreator : MonoBehaviour
 {
     public CircuitGeneratorSO CircuitGeneratorSO;
-    public List<List<Cell>> gridCells;
+    public GateTypesSO GateTypesSO;
     public GameObject cellParent;
     public GameObject image;
     public GameObject wireGameobject;
     public TMP_Text textPrefab;
-    public float cellSize;
+    public GameObject gatePrefab;
 
-    [Header("Click &  Drag Behaviour")]
+    [Header("Properties")]
+    public bool simulate;
+    public int frameCounter = 0;
+
+    [Header("Level Dependent")]
+    public List<List<Cell>> gridCells;
+    public List<GateOption> gateOptions = new();
+    public float cellSize;
+    public List<Button> gateOptioonButtons = new();
+    public List<Image> gateOptionButtonImages = new();
+
+    [Header("Click &  Drag Behaviour Making WIRE")]
     public bool isDragging = false;
     public Cell currentStartCell;
     public Cell currentEndCell;
-    private GameObject currentWire; 
+    private GameObject currentWire;
     public RectTransform canvasTransform;
     public Vector2 startPos;
     public Vector2 endPos;
     public int currentDir;
+
+    [Header("Click Behaviour Making Gates")]
+    public bool gateMode;
+    public gates selectedGateType;
+    public int selectedGateIndex;
+    public Color clickedcolor;
+    public Color normalcolor;
 
     [Header("For Slower Update")]
     private float updateInterval = 0f; // seconds
@@ -44,7 +64,6 @@ public class CircuitCreator : MonoBehaviour
         // Use the smaller one to ensure it fits both directions
         cellSize = Mathf.Min(cellWidth, cellHeight);
 
-        // Continue as before
         gridCells = new List<List<Cell>>();
         for (int i = 0; i < CircuitGeneratorSO.rows; i++)
         {
@@ -54,10 +73,59 @@ public class CircuitCreator : MonoBehaviour
                 gridCells[i].Add(new Cell(0));
             }
         }
+        gateOptions = new List<GateOption>(CircuitGeneratorSO.gateOptions);
+
+        InitializeGates();
 
         ReferenceEachCell();
         InstantiateCells();
     }
+
+    private void InitializeGates()
+    {
+        for (int i = 0; i < gateOptions.Count; i++)
+        {
+            GameObject gate = Instantiate(gatePrefab, gatePrefab.transform.parent.transform);
+            gate.SetActive(true);
+            gateOptioonButtons.Add(gate.AddComponent<Button>());
+            gateOptionButtonImages.Add(gate.GetComponent<Image>());
+            gates gateType = gateOptions[i].gateType;
+            int a = i;
+            gateOptioonButtons[i].onClick.AddListener(() => { GateOptionButtonClicked(gateType, a); });
+        }
+    }
+
+    private void GateOptionButtonClicked(gates gateType, int i)
+    {
+        for (int j = 0; j < gateOptioonButtons.Count; j++)
+        {
+            gateOptionButtonImages[j].color = normalcolor;
+        }
+        if (gateMode && selectedGateType != gateType)
+        {
+            selectedGateType = gateType;
+            selectedGateIndex = i;
+            gateMode = true;
+            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            return;
+        }
+
+        if (gateMode && selectedGateType == gateType)
+        {
+            gateMode = false;
+            gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
+            return;
+        }
+
+        if (!gateMode)
+        {
+            selectedGateType = gateType;
+            gateMode = true;
+            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            return;
+        }
+    }
+
     private void InstantiateCells()
     {
         for (int i = 0; i < gridCells.Count; i++)
@@ -66,13 +134,13 @@ public class CircuitCreator : MonoBehaviour
             {
                 GameObject cellImage = Instantiate(image, GetPosition(cellParent, i, j), Quaternion.identity, cellParent.transform);
                 Cell cell = gridCells[i][j];
-                cell.image = cellImage; 
+                cell.image = cellImage;
                 cell.button = cellImage.AddComponent<Button>();
 
                 //intantiate text
                 cell.text = cell.image.GetComponentInChildren<TMP_Text>();
                 cell.text.text = "0";
-                
+
                 // Set the size of the RectTransform
                 RectTransform rect = cell.image.GetComponent<RectTransform>();
                 rect.sizeDelta = new Vector2(cellSize - cellSize / 5, cellSize - cellSize / 5);
@@ -143,28 +211,29 @@ public class CircuitCreator : MonoBehaviour
 
 
 
+
     void Update()
     {
-        timer += Time.deltaTime;
-
-        if (timer < updateInterval)
-        {
-            return;
-        }
-        timer = 0f;
-
         if (isDragging && currentWire != null && currentStartCell != null)
         {
             StartLineAndUpdation();
-
             HandleLineEndAndNewLine();
         }
 
         CheckEachCellForNullSaves();
 
-        HandleOnOffStateOfEachCell();
-        HandleVisual();
+        // Only run simulation every 3rd frame
+        frameCounter++;
+        if (frameCounter % 3 == 0)
+        {
+            if (simulate)
+            {
+                HandleOnOffStateOfEachCell();
+            }
+            HandleVisual();
+        }
     }
+
 
     private void HandleVisual()
     {
@@ -177,7 +246,8 @@ public class CircuitCreator : MonoBehaviour
                 if (cell.value != 0)
                 {
                     cell.image.GetComponent<Image>().color = Color.red;
-                }else
+                }
+                else
                 {
                     cell.image.GetComponent<Image>().color = Color.grey;
                 }
@@ -224,8 +294,13 @@ public class CircuitCreator : MonoBehaviour
             endPos = currentEndCell.image.GetComponent<RectTransform>().position;
             UpdateLine();
 
+
+            CheckIfConnectionsAreGood(currentEndCell, (currentDir + 2) % 4);
+            CheckIfConnectionsAreGood(currentStartCell, currentDir);
+
             StartWire(currentEndCell);
         }
+
     }
     private void CheckEachCellForNullSaves()
     {
@@ -263,11 +338,12 @@ public class CircuitCreator : MonoBehaviour
                     for (int k = 0; k < cell.powerDir.Count; k++)
                     {
                         if (cell.powerDir[k] == -1) continue;          // and also giving power not taking
-                        cell.powerDir[k] = 0;                      // then remove
+
 
                         Cell neighbor = cell.adjcell[k];
-                        if (neighbor != null)
+                        if (neighbor != null && !neighbor.isGate)
                         {
+                            cell.powerDir[k] = 0;                      // then remove
                             neighbor.powerDir[(k + 2) % 4] = 0;
                         }
                     }
@@ -284,52 +360,51 @@ public class CircuitCreator : MonoBehaviour
                         receivingPower = true;
                         value = cell.adjcell[k].value - 1;
                         break;
-                    }else if (cell.powerDir[k] == -1 && cell.adjcell[k].value != 0)
+                    }
+                    else if (cell.powerDir[k] == -1 && cell.adjcell[k].value != 0 && cell.value >= cell.adjcell[k].value)
                     {
                         cell.powerDir[k] = 0;
-                        cell.adjcell[k].powerDir[(k + 2) % 4] = 0;
+                        if (!cell.adjcell[k].isGate)
+                            cell.adjcell[k].powerDir[(k + 2) % 4] = 0;
                     }
                 }
 
                 if (!receivingPower)
                 {
                     cell.value = 0;
-                }else
+                }
+                else
                 {
                     cell.value = value;
                 }
 
                 for (int k = 0; k < 4; k++)  //now check if new connection is made to give power
                 {
-                    if (cell.connection[k] && cell.adjcell[k].value != 0 && cell.powerDir[k] != 1)
+                    if (cell.connection[k] && cell.adjcell[k].value != 0 && cell.adjcell[k].value > cell.value && cell.powerDir[k] != 1 && !cell.adjcell[k].isGate)
                     {
                         cell.powerDir[k] = -1;
                         cell.adjcell[k].powerDir[(k + 2) % 4] = 1;
                         cell.value = cell.adjcell[k].value - 1;
                     }
+                    if (cell.connection[k] && cell.adjcell[k].isGate && (cell.adjcell[k].outputDir != (k + 2) % 4))
+                    {
+                        cell.powerDir[k] = 1;
+                        cell.adjcell[k].powerDir[(k + 2) % 4] = -1;
+                    }
+                    if (cell.connection[k] && cell.adjcell[k].isGate && (cell.adjcell[k].outputDir == (k + 2) % 4))
+                    {
+                        cell.powerDir[k] = -1;
+                        cell.adjcell[k].powerDir[(k + 2) % 4] = 1;
+                        cell.value = cell.adjcell[k].value;
+                    }
+                    if (cell.isGate)
+                    {
+                        HandleGateProperties(cell);
+                    }
                 }
             }
         }
     }
-
-
-    //private void CheckIfCellIsGettingPower(Cell cell)
-    //{
-    //    for (int i = 0; i < 4; i++)
-    //    {
-    //        Cell adjCell = cell.adjcell[i];
-
-    //        if (cell.powerDir[i] != -1) continue;
-    //        if (adjCell.value)
-    //        {
-
-    //        }else
-    //        {
-    //            cell.powerDir[i] = 0;
-    //            adjCell.powerDir[(i + 2) % 4] = 0;
-    //        }
-    //    }
-    //}
 
     public void UpdateLine()
     {
@@ -344,14 +419,14 @@ public class CircuitCreator : MonoBehaviour
         {
             // Horizontal line
             endPos = new Vector2(endPos.x, startPos.y);
-            currentEndCell = currentStartCell.adjcell[ delta.x > 0 ? 0 : 2 ];
+            currentEndCell = currentStartCell.adjcell[delta.x > 0 ? 0 : 2];
             currentDir = delta.x > 0 ? 0 : 2;
         }
         else
         {
             // Vertical line
             endPos = new Vector2(startPos.x, endPos.y);
-            currentEndCell = currentStartCell.adjcell[ delta.y > 0 ? 1 : 3 ];
+            currentEndCell = currentStartCell.adjcell[delta.y > 0 ? 1 : 3];
             currentDir = delta.y > 0 ? 1 : 3;
         }
 
@@ -369,6 +444,7 @@ public class CircuitCreator : MonoBehaviour
 
 
 
+    //==============Handle Clicks=============//
     internal void StartWire(Cell cell)
     {
         if (cell == null || wireGameobject == null || cellParent == null)
@@ -415,14 +491,19 @@ public class CircuitCreator : MonoBehaviour
 
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
         {
-            dir = delta.x > 0 ? 0 : 2; 
+            dir = delta.x > 0 ? 0 : 2;
         }
         else
         {
             dir = delta.y > 0 ? 1 : 3;
         }
 
+        RemoveConnection(cell, dir);
 
+
+    }
+    private void RemoveConnection(Cell cell, int dir)
+    {
         Cell adj = cell.adjcell[dir];
         if (adj != null && cell.connection[dir])
         {
@@ -444,6 +525,114 @@ public class CircuitCreator : MonoBehaviour
             }
         }
     }
+    internal void MakeGate(Cell cell)
+    {
+        if (cell.isGate)
+        {
+            cell.outputDir++;
+            cell.outputDir %= 4;
+            cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
+            CheckIfConnectionsAreGood(cell);
+            return;
+        }
+        if (gateOptions[selectedGateIndex].amount <= 0)
+        {
+            return;
+        }
+        if (!cell.isGate)
+        {
+            cell.isGate = true;
+            cell.gate = selectedGateType;
+            cell.outputDir = 0;
+            cell.noOfInputs = GetGateBehaviour(selectedGateType).noOfInputs;
+            gateOptions[selectedGateIndex].amount--;
+            cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
+            CheckIfConnectionsAreGood(cell);
+        }
+    }
+    internal void RemoveGate(Cell cell)
+    {
+        if (!cell.isGate) return;
+        cell.isGate = false;
+        cell.noOfInputs = 4;
+        Destroy(cell.gateGameobject);
+        for (int i = 0; i < gateOptions.Count; i++)
+        {
+            if (gateOptions[i].gateType == cell.gate)
+            {
+                gateOptions[i].amount++;
+                break;
+            }
+        }
+    }
+
+
+
+
+
+
+
+    private void CheckIfConnectionsAreGood(Cell cell, int preferencedDir = 0)
+    {
+        if (cell == null) return;
+        int totalInputs = 0;
+        for (int i = preferencedDir; i < preferencedDir + 4; i++)
+        {
+            int index = i % 4;
+            if (cell.connection[index] && cell.outputDir != index && totalInputs < cell.noOfInputs)
+            {
+                totalInputs++;
+            }
+            else if (cell.connection[index] && cell.outputDir != index && totalInputs >= cell.noOfInputs)
+            {
+                RemoveConnection(cell, index);
+            }
+        }
+
+        HandleGateProperties(cell);
+    }
+    private void HandleGateProperties(Cell cell)
+    {
+        if (!cell.isGate) return;
+
+        if (cell.gate == gates.not)
+        {
+            NotGateFuntion(cell);
+        }
+    
+        void NotGateFuntion(Cell cell)
+        {
+            int val = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value < 1)
+                {
+                    val = 50;
+                }
+            }
+
+            if (val > 0)
+            {
+                cell.value = val;
+            }else
+            {
+                cell.value = 0;
+            }
+        }
+    }
+
+
+    public GateBehaviour GetGateBehaviour(gates gateType)
+    {
+        for (int i = 0; i < GateTypesSO.gates.Count; i++)
+        {
+            if (gateType == GateTypesSO.gates[i].gateType)
+            {
+                return GateTypesSO.gates[i];
+            }
+        }
+        return null;
+    }
 
 }
 
@@ -455,7 +644,14 @@ public class Cell
     public List<bool> connection; // 0-noConnection, 1-connection
     public List<int> powerDir; // 0-noConnection, 1-fromThisCell, -1-toThisCell
     public List<GameObject> currentWires;
-    
+
+    //gates
+    public gates gate;
+    public bool isGate;
+    public int noOfInputs = 4;
+    public int outputDir;
+    public GameObject gateGameobject;
+
     //References
     public GameObject image;
     public TMP_Text text;
@@ -501,12 +697,26 @@ public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            circuitCreator.isDragging = true;
-            circuitCreator.StartWire(cell);
+            if (!circuitCreator.gateMode)
+            {
+                circuitCreator.isDragging = true;
+                circuitCreator.StartWire(cell);
+            }
+            else
+            {
+                circuitCreator.MakeGate(cell);
+            }
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
-            circuitCreator.HandleRightClick(cell);
+            if (!circuitCreator.gateMode)
+            {
+                circuitCreator.HandleRightClick(cell);
+            }
+            else
+            {
+                circuitCreator.RemoveGate(cell);
+            }
         }
     }
 
@@ -528,4 +738,22 @@ public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
         cell.clickStarted = false;
         circuitCreator.isDragging = false;
     }
+}
+
+
+public enum gates
+{
+    not,
+    and,
+    or,
+    xor,
+    nand,
+}
+
+[System.Serializable]
+public class GateBehaviour
+{
+    public gates gateType;
+    public int noOfInputs;
+    public GameObject prefab;
 }

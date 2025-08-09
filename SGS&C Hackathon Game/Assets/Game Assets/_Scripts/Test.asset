@@ -13,5 +13,10 @@ MonoBehaviour:
   m_Name: Test
   m_EditorClassIdentifier: 
   rows: 6
-  columns_MakeItOdd: 15
+  columns_MakeItOdd: 10
   Output: 00010001010001000100
+  gateOptions:
+  - gateType: 0
+    amount: 1
+  - gateType: 1
+    amount: 2
