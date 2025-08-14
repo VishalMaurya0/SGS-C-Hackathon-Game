@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CircuitCreator : MonoBehaviour
+public class CircuitCreator : CircuitCreation
 {
     public CircuitGeneratorSO CircuitGeneratorSO;
     public GateTypesSO GateTypesSO;
@@ -48,6 +49,12 @@ public class CircuitCreator : MonoBehaviour
     private float updateInterval = 0f; // seconds
     private float timer = 0f;
 
+    [Header("Level Save System")]
+    public List<Cell> inputs = new();
+    public List<Cell> outputs = new();
+    public GameObject inputContainer;
+    public GameObject outputContainer;
+    public string saveFolder = "Assets/Game Assets/LevelSaveSO";
 
 
 
@@ -58,7 +65,7 @@ public class CircuitCreator : MonoBehaviour
         float parentWidth = parentRect.rect.width;
         float parentHeight = parentRect.rect.height;
 
-        float cellWidth = parentWidth / CircuitGeneratorSO.columns_MakeItOdd;
+        float cellWidth = parentWidth / CircuitGeneratorSO.columns;
         float cellHeight = parentHeight / CircuitGeneratorSO.rows;
 
         // Use the smaller one to ensure it fits both directions
@@ -68,7 +75,7 @@ public class CircuitCreator : MonoBehaviour
         for (int i = 0; i < CircuitGeneratorSO.rows; i++)
         {
             gridCells.Add(new List<Cell>());
-            for (int j = 0; j < CircuitGeneratorSO.columns_MakeItOdd; j++)
+            for (int j = 0; j < CircuitGeneratorSO.columns; j++)
             {
                 gridCells[i].Add(new Cell(0));
             }
@@ -84,6 +91,48 @@ public class CircuitCreator : MonoBehaviour
 
         ReferenceEachCell();
         InstantiateCells();
+        InitializeInputCells();
+    }
+
+    private void InitializeInputCells()
+    {
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+
+            GameObject cellImage = Instantiate(image, GetInputPos(i), Quaternion.identity, inputContainer.transform);
+            inputs.Add(new Cell(0));
+            Cell cell = inputs[i];
+            cell.image = cellImage;
+            cell.button = cellImage.AddComponent<Button>();
+            cell.isSource = true;
+
+            //intantiate text
+            cell.text = cell.image.GetComponentInChildren<TMP_Text>();
+            cell.text.text = "0";
+
+            // Set the size of the RectTransform
+            RectTransform rect = cell.image.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(cellSize - cellSize / 5, cellSize - cellSize / 5);
+
+
+            // Attach CellBehaviour
+            var behaviour = cellImage.AddComponent<CellBehaviour>();
+            behaviour.Initialize(cell, this);
+        }
+    }
+
+    private Vector3 GetInputPos(int i)
+    {
+        RectTransform parentRect = inputContainer.GetComponent<RectTransform>();
+        Vector3 parentCenter = inputContainer.transform.position;
+
+        float totalHeight = CircuitGeneratorSO.rows * cellSize;
+
+        float startY = totalHeight / 2 - cellSize / 2;
+
+        float y = startY - i * cellSize;
+
+        return parentCenter + new Vector3(0f, y, 0f);
     }
 
     private void InitializeGates()
@@ -157,7 +206,7 @@ public class CircuitCreator : MonoBehaviour
             }
         }
 
-        gridCells[0][0].isSource = true;
+        //gridCells[0][0].isSource = true;
     }
     private void ReferenceEachCell()
     {
@@ -200,7 +249,7 @@ public class CircuitCreator : MonoBehaviour
         RectTransform parentRect = cellParent.GetComponent<RectTransform>();
         Vector3 parentCenter = cellParent.transform.position;
 
-        float totalWidth = CircuitGeneratorSO.columns_MakeItOdd * cellSize;
+        float totalWidth = CircuitGeneratorSO.columns * cellSize;
         float totalHeight = CircuitGeneratorSO.rows * cellSize;
 
         float startX = -totalWidth / 2 + cellSize / 2;
@@ -237,6 +286,39 @@ public class CircuitCreator : MonoBehaviour
             }
             HandleVisual();
         }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            CreateNewLevelSaveSO();
+        }
+
+    }
+
+
+    private void CreateNewLevelSaveSO()
+    {
+        // Create the ScriptableObject instance
+        LevelSaveSO asset = ScriptableObject.CreateInstance<LevelSaveSO>();
+
+        // Ensure folder exists
+        if (!AssetDatabase.IsValidFolder(saveFolder))
+        {
+            AssetDatabase.CreateFolder("Assets", "LevelSaves");
+        }
+
+        // Unique file name
+        string path = AssetDatabase.GenerateUniqueAssetPath($"{saveFolder}/LevelSaveSO.asset");
+
+        // Save asset
+        AssetDatabase.CreateAsset(asset, path);
+        AssetDatabase.SaveAssets();
+
+        Debug.Log($"Created new LevelSaveSO at {path}");
+        Selection.activeObject = asset; // Optional: auto-select the new asset
+
+        asset.gateOptions = gateOptions;
+        asset.gridCells = gridCells;
+        asset.inputs = inputs;
     }
 
 
@@ -259,6 +341,21 @@ public class CircuitCreator : MonoBehaviour
                 cell.text.text = $"{cell.value}";
             }
         }
+
+        for (int i = 0; i < inputs.Count; i++)
+        {
+            Cell cell = inputs[i];
+
+            if (cell.value != 0)
+            {
+                cell.image.GetComponent<Image>().color = Color.red;
+            }
+            else
+            {
+                cell.image.GetComponent<Image>().color = Color.grey;
+            }
+            cell.text.text = $"{cell.value}";
+        }
     }
 
     private void StartLineAndUpdation()
@@ -279,7 +376,7 @@ public class CircuitCreator : MonoBehaviour
     }
     private void HandleLineEndAndNewLine()
     {
-        if ((endPos - startPos).magnitude >= cellSize * 0.8)
+        if ((endPos - startPos).magnitude >= cellSize * 0.8 && !currentStartCell.isSource)
         {
             if (currentEndCell == null || currentStartCell.connection[currentDir] || currentEndCell.connection[(currentDir + 2) % 4])
             {
@@ -304,6 +401,34 @@ public class CircuitCreator : MonoBehaviour
             CheckIfConnectionsAreGood(currentStartCell, currentDir);
 
             StartWire(currentEndCell);
+        }
+
+        if (currentStartCell.isSource)
+        {
+            currentEndCell = gridCells[inputs.IndexOf(currentStartCell)][0];
+            if (((Vector2)currentEndCell.image.GetComponent<RectTransform>().position - endPos).magnitude < cellSize * 0.2)
+            {
+                if (currentEndCell != null && !currentEndCell.currentWires.Contains(currentWire))
+                    currentEndCell.currentWires.Add(currentWire);
+
+                if (currentEndCell == null || currentStartCell.connection[currentDir] || currentEndCell.connection[(currentDir + 2) % 4])
+                {
+                    Debug.LogError(currentEndCell);
+                    Destroy(currentWire);
+                    return;
+                }
+
+                //refe source id
+                currentEndCell.sourceID = inputs.IndexOf(currentStartCell);
+
+                currentStartCell.connection[currentDir] = true;
+                gridCells[currentEndCell.sourceID][0].connection[(currentDir + 2) % 4] = true;
+
+                endPos = currentEndCell.image.GetComponent<RectTransform>().position;
+                //UpdateLine();
+
+                StartWire(currentEndCell);
+            }
         }
 
     }
@@ -337,7 +462,7 @@ public class CircuitCreator : MonoBehaviour
                 {
                     if (cell.isSource)
                     {
-                        cell.value = 100;
+                        //cell.value = 100;
                         continue;
                     }                         //not source
                     for (int k = 0; k < cell.powerDir.Count; k++)
@@ -354,7 +479,10 @@ public class CircuitCreator : MonoBehaviour
                     }
                 }
 
-                if (cell.isSource) continue;
+                if (cell.isSource) 
+                {
+                    continue; 
+                }
 
                 bool receivingPower = false;              // if cell is not source
                 int value = 0;
@@ -385,6 +513,15 @@ public class CircuitCreator : MonoBehaviour
 
                 for (int k = 0; k < 4; k++)  //now check if new connection is made to give power
                 {
+                    if (cell.connection[k] && cell.adjcell[k] == null && cell.sourceID != -1) //either input or output adj cells
+                    {
+                        if (inputs[cell.sourceID].value != 0)
+                        {
+                            cell.value += inputs[cell.sourceID].value - 1;
+                        }
+                        break;
+                    }
+
                     if (cell.connection[k] && cell.adjcell[k].value != 0 && cell.adjcell[k].value > cell.value && cell.powerDir[k] != 1 && !cell.adjcell[k].isGate)
                     {
                         cell.powerDir[k] = -1;
@@ -505,7 +642,10 @@ public class CircuitCreator : MonoBehaviour
 
         RemoveConnection(cell, dir);
 
-
+        if (cell.isSource)
+        {
+            cell.value = cell.value <= 0 ? 100 : 0;
+        }
     }
     private void RemoveConnection(Cell cell, int dir)
     {
@@ -600,58 +740,104 @@ public class CircuitCreator : MonoBehaviour
     {
         if (!cell.isGate) return;
 
-        if (cell.gate == gates.not)
+        switch (cell.gate)
         {
-            NotGateFuntion(cell);
+            case gates.not:
+                NotGateFunction(cell);
+                break;
+
+            case gates.and:
+                AndGateFunction(cell);
+                break;
+
+            case gates.or:
+                OrGateFunction(cell);
+                break;
+
+            case gates.nand:
+                NandGateFunction(cell);
+                break;
+
+            case gates.nor:
+                NorGateFunction(cell);
+                break;
+
+            case gates.xor:
+                XorGateFunction(cell);
+                break;
         }
-        
-        if (cell.gate == gates.and)
+
+        // === Gate Implementations ===
+        void NotGateFunction(Cell cell)
         {
-            AndGateFuntion(cell);
-        }
-        
-    
-        void NotGateFuntion(Cell cell)
-        {
-            int val = 0;
+            bool hasInput = false;
             for (int i = 0; i < 4; i++)
             {
                 if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value < 1)
-                {
-                    val = 50;
-                }
+                    hasInput = true;
             }
-
-            if (val > 0)
-            {
-                cell.value = val;
-            }else
-            {
-                cell.value = 0;
-            }
+            cell.value = hasInput ? 50 : 0;
         }
 
-        void AndGateFuntion(Cell cell)
+        void AndGateFunction(Cell cell)
         {
-            int val = 0;
+            int activeInputs = 0;
             for (int i = 0; i < 4; i++)
             {
                 if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
-                {
-                    val++;
-                }
+                    activeInputs++;
             }
+            cell.value = (activeInputs >= 2) ? 50 : 0;
+        }
 
-            if (val >= 2)
+        void OrGateFunction(Cell cell)
+        {
+            bool hasActiveInput = false;
+            for (int i = 0; i < 4; i++)
             {
-                cell.value = 50;
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
+                    hasActiveInput = true;
             }
-            else
+            cell.value = hasActiveInput ? 50 : 0;
+        }
+
+        void NandGateFunction(Cell cell)
+        {
+            // NAND = NOT(AND)
+            int activeInputs = 0;
+            for (int i = 0; i < 4; i++)
             {
-                cell.value = 0;
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
+                    activeInputs++;
             }
+            cell.value = (activeInputs >= 2) ? 0 : 50;
+        }
+
+        void NorGateFunction(Cell cell)
+        {
+            // NOR = NOT(OR)
+            bool hasActiveInput = false;
+            for (int i = 0; i < 4; i++)
+            {
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
+                    hasActiveInput = true;
+            }
+            cell.value = hasActiveInput ? 0 : 50;
+        }
+
+        void XorGateFunction(Cell cell)
+        {
+            int activeInputs = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value > 0)
+                    activeInputs++;
+            }
+            // XOR outputs ON only when exactly 1 input is ON
+            cell.value = (activeInputs == 1) ? 50 : 0;
         }
     }
+
 
 
     public GateBehaviour GetGateBehaviour(gates gateType)
@@ -689,6 +875,7 @@ public class Cell
     public TMP_Text text;
     public List<Cell> adjcell; // 0-right, 1-up...
     public Button button;
+    public int sourceID = -1; // if connected to source
 
     //Register Clicking
     public bool clickStarted = false;
@@ -715,9 +902,9 @@ public class Cell
 public class CellBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
     public Cell cell;
-    public CircuitCreator circuitCreator;
+    public CircuitCreation circuitCreator;
 
-    public void Initialize(Cell cell, CircuitCreator cc)
+    public void Initialize(Cell cell, CircuitCreation cc)
     {
         this.cell = cell;
         circuitCreator = cc;
@@ -778,6 +965,7 @@ public enum gates
     not,
     and,
     or,
+    nor,
     xor,
     nand,
 }

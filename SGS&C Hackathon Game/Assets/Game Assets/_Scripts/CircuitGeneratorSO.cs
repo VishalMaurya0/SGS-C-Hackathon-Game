@@ -5,8 +5,8 @@ using UnityEngine;
 public class CircuitGeneratorSO : ScriptableObject
 {
     public int rows;
-    public int columns_MakeItOdd;
-    [Tooltip("Output.Count == column")]public List<bool> Output;
+    public int columns;
+
     public List<GateOption> gateOptions;
 }
 
