@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23b52f6e295c5b44e99c8a5cd87d8e0a, type: 3}
   m_Name: Test
   m_EditorClassIdentifier: 
-  rows: 9
-  columns: 15
+  rows: 13
+  columns: 20
   gateOptions:
   - gateType: 0
     amount: 6

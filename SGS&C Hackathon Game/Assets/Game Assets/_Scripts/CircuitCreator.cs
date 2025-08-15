@@ -29,7 +29,7 @@ public class CircuitCreator : CircuitCreation
     public List<Image> gateOptionButtonImages = new();
 
     [Header("Click &  Drag Behaviour Making WIRE")]
-    public bool isDragging = false;
+    //public bool isDragging = false;
     public Cell currentStartCell;
     public Cell currentEndCell;
     private GameObject currentWire;
@@ -39,7 +39,7 @@ public class CircuitCreator : CircuitCreation
     public int currentDir;
 
     [Header("Click Behaviour Making Gates")]
-    public bool gateMode;
+    //public bool gateMode;
     public gates selectedGateType;
     public int selectedGateIndex;
     public Color clickedcolor;
@@ -317,8 +317,45 @@ public class CircuitCreator : CircuitCreation
         Selection.activeObject = asset; // Optional: auto-select the new asset
 
         asset.gateOptions = gateOptions;
-        asset.gridCells = gridCells;
-        asset.inputs = inputs;
+        //asset.gridCells = gridCells;
+        //asset.inputData = inputs;
+        asset.cellSize = cellSize;
+        asset.rows = gridCells.Count;
+        asset.cols = gridCells[0].Count;
+
+        asset.inputData.Clear();
+        foreach (var cell in inputs)
+        {
+            InputCellData data = new InputCellData
+            {
+                value = cell.value,
+                isSource = cell.isSource,
+                sourceID = cell.sourceID,
+                connections = cell.connection
+            };
+            asset.inputData.Add(data);
+        }
+
+        asset.cellData.Clear();
+        foreach (var row in gridCells)
+        {
+            foreach (var cell in row)
+            {
+                CellData data = new CellData
+                {
+                    value = cell.value,
+                    isSource = cell.isSource,
+                    gate = cell.gate,
+                    isGate = cell.isGate,
+                    outputDir = cell.outputDir,
+                    sourceID = cell.sourceID,
+                    connections = cell.connection
+                };
+                asset.cellData.Add(data);
+            }
+        }
+        EditorUtility.SetDirty(asset);
+        AssetDatabase.SaveAssets();
     }
 
 
@@ -413,7 +450,6 @@ public class CircuitCreator : CircuitCreation
 
                 if (currentEndCell == null || currentStartCell.connection[currentDir] || currentEndCell.connection[(currentDir + 2) % 4])
                 {
-                    Debug.LogError(currentEndCell);
                     Destroy(currentWire);
                     return;
                 }
@@ -587,7 +623,7 @@ public class CircuitCreator : CircuitCreation
 
 
     //==============Handle Clicks=============//
-    internal void StartWire(Cell cell)
+    public override void StartWire(Cell cell)
     {
         if (cell == null || wireGameobject == null || cellParent == null)
         {
@@ -605,7 +641,7 @@ public class CircuitCreator : CircuitCreation
             cell.currentWires.Add(currentWire);
         }
     }
-    internal void EndWire()
+    public override void EndWire()
     {
         if ((endPos - startPos).magnitude < cellSize)
         {
@@ -614,7 +650,7 @@ public class CircuitCreator : CircuitCreation
             currentEndCell = null;
         }
     }
-    internal void HandleRightClick(Cell cell)
+    public override void HandleRightClick(Cell cell)
     {
         Vector2 cellPos = cell.image.GetComponent<RectTransform>().position;
 
@@ -670,7 +706,7 @@ public class CircuitCreator : CircuitCreation
             }
         }
     }
-    internal void MakeGate(Cell cell)
+    public override void MakeGate(Cell cell)
     {
         if (cell.isGate)
         {
@@ -695,7 +731,7 @@ public class CircuitCreator : CircuitCreation
             CheckIfConnectionsAreGood(cell);
         }
     }
-    internal void RemoveGate(Cell cell)
+    public override void RemoveGate(Cell cell)
     {
         if (!cell.isGate) return;
         cell.isGate = false;

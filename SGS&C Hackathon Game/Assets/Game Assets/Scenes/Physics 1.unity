@@ -3848,35 +3848,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 1718035882}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f6368e74fb84c94b9c1ae26bb947f3e, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b1195f1af3cf664197b3b23d81a503f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CircuitGeneratorSO: {fileID: 11400000, guid: 328152aa10c7f804f9afeddd8440b0c1, type: 2}
+  gateMode: 1
+  isDragging: 0
+  LevelSaveSO: {fileID: 11400000, guid: 9eef788ea122ba143b1ec39e62ffa38d, type: 2}
   GateTypesSO: {fileID: 11400000, guid: bed2349cacdb5584ba6c3cc2cb19bf71, type: 2}
   cellParent: {fileID: 2024762341}
   image: {fileID: 993914449}
   wireGameobject: {fileID: 1447906828422320937, guid: 7cb545f7ef97067498038880f0442ed0, type: 3}
-  textPrefab: {fileID: 1494808102}
+  textPrefab: {fileID: 0}
   gatePrefab: {fileID: 506318525}
+  inputContainer: {fileID: 256386939}
   simulate: 1
-  frameCounter: 0
+  frameCounter: 3
   gateOptions: []
-  cellSize: 110
+  cellSize: 0
   gateOptioonButtons: []
   gateOptionButtonImages: []
-  isDragging: 0
-  canvasTransform: {fileID: 1262233653}
-  startPos: {x: 0, y: 0}
-  endPos: {x: 0, y: 0}
-  currentDir: 0
-  gateMode: 0
   selectedGateType: 0
   selectedGateIndex: 0
-  clickedcolor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
-  normalcolor: {r: 0.8443396, g: 0.8443396, b: 0.8443396, a: 1}
-  inputContainer: {fileID: 256386939}
-  outputContainer: {fileID: 0}
-  saveFolder: Assets/Game Assets/LevelSaveSO
+  clickedcolor: {r: 0, g: 0, b: 0, a: 0}
+  normalcolor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &1755164006
 GameObject:
   m_ObjectHideFlags: 0

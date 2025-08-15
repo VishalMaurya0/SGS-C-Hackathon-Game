@@ -3074,7 +3074,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -870, y: 48.788}
+  m_AnchoredPosition: {x: -891, y: 48.787}
   m_SizeDelta: {x: 100, y: 858.31}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1387367080
@@ -3851,6 +3851,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f6368e74fb84c94b9c1ae26bb947f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gateMode: 0
+  isDragging: 0
   CircuitGeneratorSO: {fileID: 11400000, guid: 328152aa10c7f804f9afeddd8440b0c1, type: 2}
   GateTypesSO: {fileID: 11400000, guid: bed2349cacdb5584ba6c3cc2cb19bf71, type: 2}
   cellParent: {fileID: 2024762341}
@@ -3864,12 +3866,10 @@ MonoBehaviour:
   cellSize: 110
   gateOptioonButtons: []
   gateOptionButtonImages: []
-  isDragging: 0
   canvasTransform: {fileID: 1262233653}
   startPos: {x: 0, y: 0}
   endPos: {x: 0, y: 0}
   currentDir: 0
-  gateMode: 0
   selectedGateType: 0
   selectedGateIndex: 0
   clickedcolor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}

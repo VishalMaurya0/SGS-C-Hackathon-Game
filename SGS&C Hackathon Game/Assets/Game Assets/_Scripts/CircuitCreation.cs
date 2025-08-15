@@ -6,22 +6,27 @@ public class CircuitCreation : MonoBehaviour
     public bool gateMode;
     public bool isDragging;
 
-    internal void HandleRightClick(Cell cell)
+    public virtual void HandleRightClick(Cell cell)
     {
         throw new NotImplementedException();
     }
 
-    internal void MakeGate(Cell cell)
+    public virtual void MakeGate(Cell cell)
     {
         throw new NotImplementedException();
     }
 
-    internal void RemoveGate(Cell cell)
+    public virtual void RemoveGate(Cell cell)
     {
         throw new NotImplementedException();
     }
 
-    internal void StartWire(Cell cell)
+    public virtual void StartWire(Cell cell)
+    {
+        throw new NotImplementedException();
+    }
+    
+    public virtual void EndWire()
     {
         throw new NotImplementedException();
     }
