@@ -83,7 +83,6 @@ public class LevelCreationFromSO : CircuitCreation
             cell.isSource = LevelSaveSO.inputData[i].isSource;
             cell.sourceID = LevelSaveSO.inputData[i].sourceID;
             cell.connection = LevelSaveSO.inputData[i].connections;
-            gridCells[i].Add(cell);
 
             inputs.Add(cell);
             

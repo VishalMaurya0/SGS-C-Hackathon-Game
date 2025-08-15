@@ -8,26 +8,26 @@ public class CircuitCreation : MonoBehaviour
 
     public virtual void HandleRightClick(Cell cell)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     public virtual void MakeGate(Cell cell)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     public virtual void RemoveGate(Cell cell)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     public virtual void StartWire(Cell cell)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
     
     public virtual void EndWire()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 }

@@ -3869,8 +3869,8 @@ MonoBehaviour:
   gateOptionButtonImages: []
   selectedGateType: 0
   selectedGateIndex: 0
-  clickedcolor: {r: 0, g: 0, b: 0, a: 0}
-  normalcolor: {r: 0, g: 0, b: 0, a: 0}
+  clickedcolor: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+  normalcolor: {r: 0.7075472, g: 0.7075472, b: 0.7075472, a: 1}
 --- !u!1 &1755164006
 GameObject:
   m_ObjectHideFlags: 0
