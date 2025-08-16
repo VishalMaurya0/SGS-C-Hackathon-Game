@@ -7,6 +7,7 @@ public class LevelSaveSO : ScriptableObject
     public List<CellData> cellData = new();
     public List<GateOption> gateOptions = new();
     public List<InputCellData> inputData = new();
+    public List<bool> outputData = new();
     public float cellSize;
     public int rows;
     public int cols;

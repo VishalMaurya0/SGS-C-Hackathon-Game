@@ -10,12 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23b52f6e295c5b44e99c8a5cd87d8e0a, type: 3}
-  m_Name: Test
+  m_Name: LevelBuilder
   m_EditorClassIdentifier: 
-  rows: 13
-  columns: 20
+  rows: 6
+  columns: 10
   gateOptions:
   - gateType: 0
-    amount: 6
+    amount: 100
   - gateType: 1
-    amount: 1
+    amount: 100
+  - gateType: 2
+    amount: 100
+  - gateType: 3
+    amount: 100
+  - gateType: 4
+    amount: 100
+  - gateType: 5
+    amount: 100

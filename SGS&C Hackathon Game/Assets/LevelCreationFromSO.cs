@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using TMPro;
 using UnityEditor;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,6 +19,11 @@ public class LevelCreationFromSO : CircuitCreation
     public TMP_Text textPrefab;
     public GameObject gatePrefab;
     public GameObject inputContainer;
+    public GameObject outputContainer;
+
+
+    public Sprite unActivatedCell;
+    public Sprite activatedCell;
 
 
     [Header("Properties")]
@@ -44,6 +50,11 @@ public class LevelCreationFromSO : CircuitCreation
     public List<Cell> inputs = new();
 
 
+    [Header("Check For Correct Output")]
+    public float recheckTime = 3f;
+    public float recheckTimer = 0f;
+    public bool levelDone;
+
     private void Start()
     {
         GetValuesFromSO();
@@ -54,6 +65,8 @@ public class LevelCreationFromSO : CircuitCreation
 
         InstantiateCells();
         InitializeInputCells();
+        InitializeOutputCells();
+        InitializeWires();
     }
 
     private void GetValuesFromSO()
@@ -90,9 +103,50 @@ public class LevelCreationFromSO : CircuitCreation
 
         cellSize = LevelSaveSO.cellSize;
 
-        gateOptions = new List<GateOption>(LevelSaveSO.gateOptions);
+        //gateOptions = new List<GateOption>(LevelSaveSO.gateOptions);
+
+        InitializeGateOptions();
     }
 
+    private void InitializeGateOptions()
+    {
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+            for (int j = 0; j < LevelSaveSO.cols; j++)
+            {
+                Cell cell = gridCells[i][j];
+                if (cell.isGate)
+                {
+                    if (IsGateAvailableToAdd(cell.gate, out GateOption gateOption))
+                    {
+                        gateOption.amount++;
+                        cell.isGate = false;
+                    }else
+                    {
+                        GateOption newGateOption = new GateOption();
+                        newGateOption.gateType = cell.gate;
+                        newGateOption.amount++;
+                        gateOptions.Add(newGateOption);
+                        cell.isGate = false;
+                    }
+                }
+            }
+        }
+
+        bool IsGateAvailableToAdd(gates gateType, out GateOption gateoption)
+        {
+            foreach (var gateOption in gateOptions)
+            {
+                if (gateOption.gateType == gateType)
+                {
+                    gateoption = gateOption;
+                    return true;
+                }
+            }
+            gateoption = null;
+            return false;
+        }
+    }
 
     private void ReferenceEachCell()
     {
@@ -147,13 +201,94 @@ public class LevelCreationFromSO : CircuitCreation
 
             // Set the size of the RectTransform
             RectTransform rect = cell.image.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(cellSize - cellSize / 5, cellSize - cellSize / 5);
+            rect.sizeDelta = new Vector2(cellSize , cellSize );
 
 
             // Attach CellBehaviour
             var behaviour = cellImage.AddComponent<CellBehaviour>();
             behaviour.Initialize(cell, this);
         }
+    }
+
+
+    private void InitializeOutputCells()
+    {
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+
+            GameObject cellImage = Instantiate(image, GetOutputPos(i), Quaternion.identity, outputContainer.transform);
+
+            RectTransform rect = cellImage.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(cellSize , cellSize );
+
+            cellImage.GetComponent<Image>().sprite = LevelSaveSO.outputData[i] ? activatedCell : unActivatedCell;
+        }
+    }
+
+
+    private void InitializeWires()
+    {
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+            for (int j = 0; j < gridCells[i].Count; j+=2)
+            {
+                Cell cell = gridCells[i][j + (i % 2)];
+                if (cell == null) continue;
+
+
+                for (int k = 0; k < 4; k++)
+                {
+                    if (cell.connection[k])  //not for input wires
+                    {
+                        if (cell == null || wireGameobject == null || cellParent == null)
+                        {
+                            return;
+                        }
+
+                        currentWire = Instantiate(wireGameobject, cellParent.transform);
+                        cell.currentWires.Add(currentWire);
+
+                        RectTransform rect = currentWire.GetComponent<RectTransform>();
+
+                        Vector2 startPos = cell.image.transform.position;
+                        Vector2 endPos = Vector2.zero; ;
+                        if (cell.adjcell[k] != null)
+                        {
+                            endPos = cell.adjcell[k].image.transform.position;
+                            cell.adjcell[k].currentWires.Add(currentWire);
+                        }
+                        else
+                        {
+                            endPos = inputs[i].image.transform.position;
+                        }
+
+                            Vector2 direction = endPos - startPos;
+                        float distance = direction.magnitude;
+
+                        rect.sizeDelta = new Vector2(distance, 24f);
+                        rect.pivot = new Vector2(0, 0.5f);
+                        rect.position = startPos;
+
+                        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                        rect.rotation = Quaternion.Euler(0, 0, angle);
+                    }
+                }
+            }
+        }
+    }
+
+    private Vector3 GetOutputPos(int i)
+    {
+        RectTransform parentRect = outputContainer.GetComponent<RectTransform>();
+        Vector3 parentCenter = outputContainer.transform.position;
+
+        float totalHeight = gridCells.Count * cellSize;
+
+        float startY = totalHeight / 2 - cellSize / 2;
+
+        float y = startY - i * cellSize;
+
+        return parentCenter + new Vector3(0f, y, 0f);
     }
 
     private Vector3 GetInputPos(int i)
@@ -174,7 +309,7 @@ public class LevelCreationFromSO : CircuitCreation
     {
         for (int i = 0; i < gateOptions.Count; i++)
         {
-            GameObject gate = Instantiate(gatePrefab, gatePrefab.transform.parent.transform);
+            GameObject gate = Instantiate(GetGateBehaviour(gateOptions[i].gateType).prefab, gatePrefab.transform.parent.transform);
             gate.SetActive(true);
             gateOptioonButtons.Add(gate.AddComponent<Button>());
             gateOptionButtonImages.Add(gate.GetComponent<Image>());
@@ -183,6 +318,8 @@ public class LevelCreationFromSO : CircuitCreation
             gateOptioonButtons[i].onClick.AddListener(() => { GateOptionButtonClicked(gateType, a); });
         }
     }
+
+
 
     private void GateOptionButtonClicked(gates gateType, int i)
     {
@@ -209,6 +346,7 @@ public class LevelCreationFromSO : CircuitCreation
         if (!gateMode)
         {
             selectedGateType = gateType;
+            selectedGateIndex = i;
             gateMode = true;
             gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
             return;
@@ -232,7 +370,7 @@ public class LevelCreationFromSO : CircuitCreation
 
                 // Set the size of the RectTransform
                 RectTransform rect = cell.image.GetComponent<RectTransform>();
-                rect.sizeDelta = new Vector2(cellSize - cellSize / 5, cellSize - cellSize / 5);
+                rect.sizeDelta = new Vector2(cellSize , cellSize );
 
 
                 // Attach CellBehaviour
@@ -272,9 +410,28 @@ public class LevelCreationFromSO : CircuitCreation
                 HandleOnOffStateOfEachCell();
             }
             HandleVisual();
+
+            CheckOutput();
         }
     }
 
+    private void CheckOutput()
+    {
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+            bool val = gridCells[i][gridCells[0].Count - 1].value == 0 ? false : true;
+
+            if (LevelSaveSO.outputData[i] != val)
+            {
+                recheckTimer = 0;
+                return;
+            }
+        }
+        recheckTimer += Time.deltaTime;
+
+        if (recheckTimer > recheckTime)
+            levelDone = true;
+    }
 
     private void HandleOnOffStateOfEachCell()
     {
@@ -418,6 +575,8 @@ public class LevelCreationFromSO : CircuitCreation
             {
                 if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i].value < 1)
                     hasInput = true;
+                //else if (cell.connection[i] && i != cell.outputDir && cell.adjcell[i] == null)
+                //    hasInput = true;
             }
             cell.value = hasInput ? 50 : 0;
         }
@@ -491,11 +650,13 @@ public class LevelCreationFromSO : CircuitCreation
 
                 if (cell.value != 0)
                 {
-                    cell.image.GetComponent<Image>().color = Color.red;
+                    //cell.image.GetComponent<Image>().color = Color.red;
+                    cell.image.GetComponent<Image>().sprite = activatedCell;
                 }
                 else
                 {
-                    cell.image.GetComponent<Image>().color = Color.grey;
+                    //cell.image.GetComponent<Image>().color = Color.grey;
+                    cell.image.GetComponent<Image>().sprite = unActivatedCell;
                 }
                 cell.text.text = $"{cell.value}";
             }
@@ -507,11 +668,13 @@ public class LevelCreationFromSO : CircuitCreation
 
             if (cell.value != 0)
             {
-                cell.image.GetComponent<Image>().color = Color.red;
+                //cell.image.GetComponent<Image>().color = Color.red;
+                cell.image.GetComponent<Image>().sprite = activatedCell;
             }
             else
             {
-                cell.image.GetComponent<Image>().color = Color.grey;
+                //cell.image.GetComponent<Image>().color = Color.grey;
+                cell.image.GetComponent<Image>().sprite = unActivatedCell;
             }
             cell.text.text = $"{cell.value}";
         }

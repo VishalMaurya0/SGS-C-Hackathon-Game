@@ -21,10 +21,13 @@ MonoBehaviour:
     prefab: {fileID: 6075607189977428417, guid: fc2c9256a75748146a0b5d8c19c3bced, type: 3}
   - gateType: 2
     noOfInputs: 2
-    prefab: {fileID: 0}
+    prefab: {fileID: 6075607189977428417, guid: 482ea1626c5bc674496acac220c2f038, type: 3}
   - gateType: 3
     noOfInputs: 2
-    prefab: {fileID: 0}
+    prefab: {fileID: 6075607189977428417, guid: d44c7dfed50998f44bcbf018545a4541, type: 3}
   - gateType: 4
     noOfInputs: 2
-    prefab: {fileID: 0}
+    prefab: {fileID: 6075607189977428417, guid: 1795d3e519ba6204797f98044042d366, type: 3}
+  - gateType: 5
+    noOfInputs: 2
+    prefab: {fileID: 6075607189977428417, guid: 086609ea707ce6a4ba8e94e6c2f4f227, type: 3}

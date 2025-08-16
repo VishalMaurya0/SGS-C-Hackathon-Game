@@ -17,6 +17,10 @@ public class CircuitCreator : CircuitCreation
     public TMP_Text textPrefab;
     public GameObject gatePrefab;
 
+    public Sprite unActivatedCell;
+    public Sprite activatedCell;
+
+
     [Header("Properties")]
     public bool simulate;
     public int frameCounter = 0;
@@ -94,6 +98,7 @@ public class CircuitCreator : CircuitCreation
         InitializeInputCells();
     }
 
+    
     private void InitializeInputCells()
     {
         for (int i = 0; i < gridCells.Count; i++)
@@ -139,7 +144,7 @@ public class CircuitCreator : CircuitCreation
     {
         for (int i = 0; i < gateOptions.Count; i++)
         {
-            GameObject gate = Instantiate(gatePrefab, gatePrefab.transform.parent.transform);
+            GameObject gate = Instantiate(GetGateBehaviour(gateOptions[i].gateType).prefab, gatePrefab.transform.parent.transform);
             gate.SetActive(true);
             gateOptioonButtons.Add(gate.AddComponent<Button>());
             gateOptionButtonImages.Add(gate.GetComponent<Image>());
@@ -197,7 +202,7 @@ public class CircuitCreator : CircuitCreation
 
                 // Set the size of the RectTransform
                 RectTransform rect = cell.image.GetComponent<RectTransform>();
-                rect.sizeDelta = new Vector2(cellSize - cellSize / 5, cellSize - cellSize / 5);
+                rect.sizeDelta = new Vector2(cellSize , cellSize );
 
 
                 // Attach CellBehaviour
@@ -260,6 +265,7 @@ public class CircuitCreator : CircuitCreation
 
         return parentCenter + new Vector3(x, y, 0f);
     }
+    
 
 
 
@@ -323,6 +329,11 @@ public class CircuitCreator : CircuitCreation
         asset.rows = gridCells.Count;
         asset.cols = gridCells[0].Count;
 
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+            asset.outputData.Add(gridCells[i][gridCells[0].Count - 1].value == 0 ? false : true);
+        }
+
         asset.inputData.Clear();
         foreach (var cell in inputs)
         {
@@ -369,11 +380,13 @@ public class CircuitCreator : CircuitCreation
 
                 if (cell.value != 0)
                 {
-                    cell.image.GetComponent<Image>().color = Color.red;
+                    //cell.image.GetComponent<Image>().color = Color.red;
+                    cell.image.GetComponent<Image>().sprite = activatedCell;
                 }
                 else
                 {
-                    cell.image.GetComponent<Image>().color = Color.grey;
+                    //cell.image.GetComponent<Image>().color = Color.grey;
+                    cell.image.GetComponent<Image>().sprite = unActivatedCell;
                 }
                 cell.text.text = $"{cell.value}";
             }
@@ -385,11 +398,13 @@ public class CircuitCreator : CircuitCreation
 
             if (cell.value != 0)
             {
-                cell.image.GetComponent<Image>().color = Color.red;
+                //cell.image.GetComponent<Image>().color = Color.red;
+                    cell.image.GetComponent<Image>().sprite = activatedCell;
             }
             else
             {
-                cell.image.GetComponent<Image>().color = Color.grey;
+                //cell.image.GetComponent<Image>().color = Color.grey;
+                    cell.image.GetComponent<Image>().sprite = unActivatedCell;
             }
             cell.text.text = $"{cell.value}";
         }
@@ -611,7 +626,7 @@ public class CircuitCreator : CircuitCreation
         Vector2 direction = endPos - startPos;
         float distance = direction.magnitude;
 
-        rect.sizeDelta = new Vector2(distance, 15f);
+        rect.sizeDelta = new Vector2(distance, 24f);
         rect.pivot = new Vector2(0, 0.5f);
         rect.position = startPos;
 

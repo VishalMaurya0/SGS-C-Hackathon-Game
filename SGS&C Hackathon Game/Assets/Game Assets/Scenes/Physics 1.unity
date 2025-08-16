@@ -1995,7 +1995,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1024462510
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2010,10 +2010,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1166501141}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50.000103, y: -429.15524}
+  m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1024462511
 MonoBehaviour:
@@ -2457,7 +2457,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1166501141}
   - component: {fileID: 1166501143}
-  - component: {fileID: 1166501142}
   m_Layer: 5
   m_Name: All Outputs
   m_TagString: Untagged
@@ -2485,30 +2484,6 @@ RectTransform:
   m_AnchoredPosition: {x: -0.00009918213, y: -0.00024414062}
   m_SizeDelta: {x: 0.00020599, y: 0.0005}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1166501142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1166501140}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 20
-    m_Right: 20
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_StartCorner: 0
-  m_StartAxis: 0
-  m_CellSize: {x: 90, y: 90}
-  m_Spacing: {x: 5, y: 0}
-  m_Constraint: 0
-  m_ConstraintCount: 2
 --- !u!222 &1166501143
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3853,7 +3828,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gateMode: 1
   isDragging: 0
-  LevelSaveSO: {fileID: 11400000, guid: 9eef788ea122ba143b1ec39e62ffa38d, type: 2}
+  LevelSaveSO: {fileID: 11400000, guid: 43e834dc85870ca409d031a46dd2d47d, type: 2}
   GateTypesSO: {fileID: 11400000, guid: bed2349cacdb5584ba6c3cc2cb19bf71, type: 2}
   cellParent: {fileID: 2024762341}
   image: {fileID: 993914449}
@@ -3861,6 +3836,9 @@ MonoBehaviour:
   textPrefab: {fileID: 0}
   gatePrefab: {fileID: 506318525}
   inputContainer: {fileID: 256386939}
+  outputContainer: {fileID: 1166501140}
+  unActivatedCell: {fileID: 21300000, guid: 9997ef4af1ce0714db3f7a63ed8e150f, type: 3}
+  activatedCell: {fileID: 21300000, guid: 2119ab6d5bbc5ba48a6d02223ff6b971, type: 3}
   simulate: 1
   frameCounter: 3
   gateOptions: []
@@ -3871,6 +3849,9 @@ MonoBehaviour:
   selectedGateIndex: 0
   clickedcolor: {r: 0.25, g: 0.25, b: 0.25, a: 1}
   normalcolor: {r: 0.7075472, g: 0.7075472, b: 0.7075472, a: 1}
+  recheckTime: 3
+  recheckTimer: 0
+  levelDone: 0
 --- !u!1 &1755164006
 GameObject:
   m_ObjectHideFlags: 0

@@ -908,7 +908,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &506318526
 RectTransform:
   m_ObjectHideFlags: 0
@@ -923,10 +923,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1301700309}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 920, y: -52.65835}
+  m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &506318527
 MonoBehaviour:
@@ -1960,7 +1960,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 9997ef4af1ce0714db3f7a63ed8e150f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2659,8 +2659,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 890, y: 48.787}
-  m_SizeDelta: {x: 100, y: 858.31}
+  m_AnchoredPosition: {x: 891.2378, y: 48.787}
+  m_SizeDelta: {x: 137.5346, y: 858.31}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1208538774
 MonoBehaviour:
@@ -2675,7 +2675,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.7727647, g: 1, b: 0.62352943, a: 1}
+  m_Color: {r: 0.7689866, g: 0.8679245, b: 0.70416516, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2944,7 +2944,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.122641504, g: 0.122641504, b: 0.122641504, a: 1}
+  m_Color: {r: 0.13725491, g: 0.13725491, b: 0.13725491, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3074,8 +3074,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -891, y: 48.787}
-  m_SizeDelta: {x: 100, y: 858.31}
+  m_AnchoredPosition: {x: -889.04004, y: 48.787}
+  m_SizeDelta: {x: 141.92, y: 858.31}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1387367080
 MonoBehaviour:
@@ -3090,7 +3090,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.6226415, b: 0.6226415, a: 0.29411766}
+  m_Color: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 0.6}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3454,8 +3454,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4279172864
-  m_fontColor: {r: 0, g: 1, b: 0.055560827, a: 1}
+    rgba: 982784
+  m_fontColor: {r: 0, g: 1, b: 0.055560827, a: 0}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3860,6 +3860,8 @@ MonoBehaviour:
   wireGameobject: {fileID: 1447906828422320937, guid: 7cb545f7ef97067498038880f0442ed0, type: 3}
   textPrefab: {fileID: 1494808102}
   gatePrefab: {fileID: 506318525}
+  unActivatedCell: {fileID: 21300000, guid: 9997ef4af1ce0714db3f7a63ed8e150f, type: 3}
+  activatedCell: {fileID: 21300000, guid: 2119ab6d5bbc5ba48a6d02223ff6b971, type: 3}
   simulate: 1
   frameCounter: 0
   gateOptions: []
