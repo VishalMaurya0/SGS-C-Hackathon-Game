@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Windows;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class LevelCreationFromSO : CircuitCreation
 {
@@ -59,6 +60,14 @@ public class LevelCreationFromSO : CircuitCreation
     public float recheckTimer = 0f;
     public bool levelDone;
 
+
+    [Header("Gate Explanation")]
+    public TMP_Text TitleText;
+    public TMP_Text DescText;
+    public GameObject explanationWindow;
+    public GateExplanationSO GateExplanationSO;
+
+
     private void Start()
     {
         GetValuesFromSO();
@@ -77,6 +86,35 @@ public class LevelCreationFromSO : CircuitCreation
             simulateButton.SetActive(true);
 
             StartCoroutine(SimulateFor2Sec());
+        }
+
+        GateExplanation();
+    }
+
+    private void GateExplanation()
+    {
+        for (int i = 0; i < gateOptions.Count; i++)
+        {
+            for (int j = 0; j < GameData.Instance.gatesToExplain.Count; j++)
+            {
+                GateExplainEntry gateToExplain = GameData.Instance.gatesToExplain[j];
+                if (gateToExplain.gateType == gateOptions[i].gateType && !gateToExplain.explained)
+                {
+                    //Explain
+                    explanationWindow.SetActive(true);
+                    TitleText.text = $"{gateToExplain.gateType}";
+                    for (global::System.Int32 k = 0; k < GateExplanationSO.gateExplanations.Count; k++)
+                    {
+                        if (GateExplanationSO.gateExplanations[k].gateType == gateToExplain.gateType)
+                        {
+                            DescText.text = GateExplanationSO.gateExplanations[k].desc + $"\n\nIt Takes {GetGateBehaviour(gateToExplain.gateType).noOfInputs} Input wire / wires and Output 1 Wire to the right, You can rotate the Output Direction";
+                        }
+                    }
+                    Debug.Log($"Marking {gateToExplain.gateType} as explained");
+                    GameData.Instance.gatesToExplain[j].explained = true;
+                    Debug.Log($"Now explained? {GameData.Instance.gatesToExplain[j].explained}");
+                }
+            }
         }
     }
 
