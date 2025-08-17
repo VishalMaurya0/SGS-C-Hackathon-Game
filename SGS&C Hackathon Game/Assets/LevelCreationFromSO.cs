@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using TMPro;
@@ -6,6 +7,7 @@ using UnityEditor;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Windows;
 
@@ -20,10 +22,12 @@ public class LevelCreationFromSO : CircuitCreation
     public GameObject gatePrefab;
     public GameObject inputContainer;
     public GameObject outputContainer;
+    public GameObject simulateButton;
 
 
     public Sprite unActivatedCell;
     public Sprite activatedCell;
+    public bool hardMode;
 
 
     [Header("Properties")]
@@ -67,6 +71,27 @@ public class LevelCreationFromSO : CircuitCreation
         InitializeInputCells();
         InitializeOutputCells();
         InitializeWires();
+
+        if (MainMenu.Instance.GameType == 1)
+        {
+            simulateButton.SetActive(true);
+
+            StartCoroutine(SimulateFor2Sec());
+        }
+    }
+
+    IEnumerator SimulateFor2Sec()
+    {
+        simulate = true;
+        yield return new WaitForSeconds(recheckTime - 0.2f);
+
+        hardMode = true;
+        simulate = false;
+    }
+
+    public void Simulate()
+    {
+        simulate = true;
     }
 
     private void GetValuesFromSO()
@@ -311,6 +336,16 @@ public class LevelCreationFromSO : CircuitCreation
         {
             GameObject gate = Instantiate(GetGateBehaviour(gateOptions[i].gateType).prefab, gatePrefab.transform.parent.transform);
             gate.SetActive(true);
+
+
+            TMP_Text amount = gate.GetComponentInChildren<TMP_Text>();
+            amount.text = $"{gateOptions[i].amount}";
+            gateOptions[i].text = amount;
+            if (MainMenu.Instance.GameType == 2 || SceneManager.GetActiveScene().name == "Level Builder")
+            {
+                gateOptions[i].text.gameObject.SetActive(false);
+            }
+            
             gateOptioonButtons.Add(gate.AddComponent<Button>());
             gateOptionButtonImages.Add(gate.GetComponent<Image>());
             gates gateType = gateOptions[i].gateType;
@@ -411,10 +446,15 @@ public class LevelCreationFromSO : CircuitCreation
             }
             HandleVisual();
 
-            CheckOutput();
+            if (!hardMode)
+                CheckOutput();
+
+            if (hardMode && simulate)
+                CheckOutput();
         }
     }
 
+    Coroutine reset;
     private void CheckOutput()
     {
         for (int i = 0; i < gridCells.Count; i++)
@@ -424,13 +464,42 @@ public class LevelCreationFromSO : CircuitCreation
             if (LevelSaveSO.outputData[i] != val)
             {
                 recheckTimer = 0;
+                if (hardMode && reset == null)
+                {
+                    reset = StartCoroutine(Reset());
+                }
+                Debug.Log("Output Not Maching!");
                 return;
             }
         }
-        recheckTimer += Time.deltaTime;
+        for (int i = 0; i < gateOptions.Count; i++)
+        {
+            if (gateOptions[i].amount > 0)
+            {
+                recheckTimer = 0;
+                if (hardMode && reset == null)
+                {
+                    reset = StartCoroutine(Reset());
+                }
+                Debug.Log("Gates Still Present!");
+                return;
+            }
+        }
+        recheckTimer += Time.deltaTime * 3;
 
         if (recheckTimer > recheckTime)
+        {
             levelDone = true;
+            MainMenu.Instance.LevelClicked++;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    IEnumerator Reset()
+    {
+        yield return new WaitForSeconds(recheckTime + 1f);
+        if (!levelDone)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void HandleOnOffStateOfEachCell()
@@ -691,21 +760,41 @@ public class LevelCreationFromSO : CircuitCreation
             //CheckIfConnectionsAreGood(cell);
             return;
         }
-        if (gateOptions[selectedGateIndex].amount <= 0)
-        {
-            return;
-        }
-        if (!cell.isGate)
+        if (gateOptions[selectedGateIndex].amount <= 0 || gateOptions[selectedGateIndex].gateType != selectedGateType) return;
+        if (!cell.isGate && IsCellConnected(cell))
         {
             cell.isGate = true;
             cell.gate = selectedGateType;
             cell.outputDir = 0;
             cell.noOfInputs = GetGateBehaviour(selectedGateType).noOfInputs;
             gateOptions[selectedGateIndex].amount--;
+
+            RefreshAllGateText();
+
             cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
+            cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
             //CheckIfConnectionsAreGood(cell);
         }
     }
+
+    private bool IsCellConnected(Cell cell)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (cell.connection[i])
+                { return true; }
+        }
+        return false;
+    }
+
+    private void RefreshAllGateText()
+    {
+        for (int i = 0; i < gateOptions.Count; i++)
+        {
+            gateOptions[i].text.text = $"{gateOptions[i].amount}";
+        }
+    }
+
     public override void RemoveGate(Cell cell)
     {
         if (!cell.isGate) return;
@@ -717,6 +806,8 @@ public class LevelCreationFromSO : CircuitCreation
             if (gateOptions[i].gateType == cell.gate)
             {
                 gateOptions[i].amount++;
+                RefreshAllGateText();
+                gateOptions[selectedGateIndex].text.text = $"{gateOptions[selectedGateIndex].amount}";
                 break;
             }
         }

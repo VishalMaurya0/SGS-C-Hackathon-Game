@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CircuitGeneratorSO", menuName = "Scriptable Objects/CircuitGeneratorSO")]
@@ -15,4 +16,5 @@ public class GateOption
 {
     public gates gateType;
     public int amount;
+    public TMP_Text text;
 }

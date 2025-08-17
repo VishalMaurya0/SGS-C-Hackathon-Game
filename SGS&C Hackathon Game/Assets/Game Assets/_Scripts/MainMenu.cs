@@ -20,7 +20,8 @@ public class MainMenu : MonoBehaviour
     public int noOfLevels;
     public string saveFolder = "Assets/Game Assets/LevelSaveSO";
 
-    [Header("Level Buttons")]
+    [Header("Info")]
+    public int LevelClicked = 0;
     public int GameType = 0;
 
     private void Awake()
@@ -40,7 +41,35 @@ public class MainMenu : MonoBehaviour
     {
         noOfLevels = GetAssetCountInPath();
 
-        InitializeButtons();
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+
+        if (ButtonPrefab != null)
+            InitializeButtons();
+    }
+
+    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        if (SceneManager.GetActiveScene().name == "0")
+        {
+            // Get all asset GUIDs in the save folder
+            string[] guids = AssetDatabase.FindAssets("", new[] { saveFolder });
+
+            if (LevelClicked >= 0 && LevelClicked < guids.Length)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[LevelClicked]);
+                ScriptableObject so = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+
+                var creator = FindAnyObjectByType<LevelCreationFromSO>();
+                if (creator != null)
+                {
+                    creator.LevelSaveSO = (LevelSaveSO)so;
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Invalid LevelClicked index {LevelClicked}, total assets = {guids.Length}");
+            }
+        }
     }
 
     private void InitializeButtons()
@@ -60,7 +89,8 @@ public class MainMenu : MonoBehaviour
 
     private void OnLevelButtonClicked(int a)
     {
-        SceneManager.LoadScene($"{a}");
+        SceneManager.LoadScene("0");
+        LevelClicked = a;
     }
 
     public int GetAssetCountInPath()
@@ -84,6 +114,11 @@ public class MainMenu : MonoBehaviour
         {
             SceneManager.LoadScene("Level Builder");
         }
+    }
+
+    public void Home()
+    {
+        SceneManager.LoadScene("Main Menu");
     }
 
 }

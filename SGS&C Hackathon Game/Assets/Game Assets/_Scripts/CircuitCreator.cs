@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CircuitCreator : CircuitCreation
@@ -146,6 +147,17 @@ public class CircuitCreator : CircuitCreation
         {
             GameObject gate = Instantiate(GetGateBehaviour(gateOptions[i].gateType).prefab, gatePrefab.transform.parent.transform);
             gate.SetActive(true);
+
+
+            TMP_Text amount = gate.GetComponentInChildren<TMP_Text>();
+            amount.text = $"{gateOptions[i].amount}";
+            gateOptions[i].text = amount;
+            if (MainMenu.Instance.GameType == 2
+                || SceneManager.GetActiveScene().name == "Level Builder")
+            {
+                gateOptions[i].text?.gameObject.SetActive(false);
+            }
+
             gateOptioonButtons.Add(gate.AddComponent<Button>());
             gateOptionButtonImages.Add(gate.GetComponent<Image>());
             gates gateType = gateOptions[i].gateType;
@@ -322,7 +334,7 @@ public class CircuitCreator : CircuitCreation
         Debug.Log($"Created new LevelSaveSO at {path}");
         Selection.activeObject = asset; // Optional: auto-select the new asset
 
-        asset.gateOptions = gateOptions;
+        //asset.gateOptions = gateOptions;
         //asset.gridCells = gridCells;
         //asset.inputData = inputs;
         asset.cellSize = cellSize;
@@ -743,6 +755,7 @@ public class CircuitCreator : CircuitCreation
             cell.noOfInputs = GetGateBehaviour(selectedGateType).noOfInputs;
             gateOptions[selectedGateIndex].amount--;
             cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
+            cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
             CheckIfConnectionsAreGood(cell);
         }
     }
