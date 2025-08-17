@@ -24,6 +24,7 @@ public class LevelCreationFromSO : CircuitCreation
     public GameObject inputContainer;
     public GameObject outputContainer;
     public GameObject simulateButton;
+    public GameObject WhatToDoObj;
 
 
     public Sprite unActivatedCell;
@@ -59,6 +60,7 @@ public class LevelCreationFromSO : CircuitCreation
     public float recheckTime = 3f;
     public float recheckTimer = 0f;
     public bool levelDone;
+    public TMP_Text TimerVisual;
 
 
     [Header("Gate Explanation")]
@@ -81,7 +83,7 @@ public class LevelCreationFromSO : CircuitCreation
         InitializeOutputCells();
         InitializeWires();
 
-        if (MainMenu.Instance.GameType == 1)
+        if (GameData.Instance.GameType == 1)
         {
             simulateButton.SetActive(true);
 
@@ -89,6 +91,12 @@ public class LevelCreationFromSO : CircuitCreation
         }
 
         GateExplanation();
+
+        if (GameData.Instance.isFirst)
+        {
+            WhatToDoObj.SetActive(true);
+            GameData.Instance.isFirst = false;
+        }
     }
 
     private void GateExplanation()
@@ -379,7 +387,7 @@ public class LevelCreationFromSO : CircuitCreation
             TMP_Text amount = gate.GetComponentInChildren<TMP_Text>();
             amount.text = $"{gateOptions[i].amount}";
             gateOptions[i].text = amount;
-            if (MainMenu.Instance.GameType == 2 || SceneManager.GetActiveScene().name == "Level Builder")
+            if (GameData.Instance.GameType == 2 || SceneManager.GetActiveScene().name == "Level Builder")
             {
                 gateOptions[i].text.gameObject.SetActive(false);
             }
@@ -495,6 +503,9 @@ public class LevelCreationFromSO : CircuitCreation
     Coroutine reset;
     private void CheckOutput()
     {
+        TimerVisual.gameObject.SetActive(false);
+
+
         for (int i = 0; i < gridCells.Count; i++)
         {
             bool val = gridCells[i][gridCells[0].Count - 1].value == 0 ? false : true;
@@ -523,12 +534,15 @@ public class LevelCreationFromSO : CircuitCreation
                 return;
             }
         }
+        TimerVisual.gameObject.SetActive(true);
         recheckTimer += Time.deltaTime * 3;
+        TimerVisual.text = $"{(recheckTime - recheckTimer).ToString("F2")}";
+
 
         if (recheckTimer > recheckTime)
         {
             levelDone = true;
-            MainMenu.Instance.LevelClicked++;
+            GameData.Instance.LevelClicked++;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

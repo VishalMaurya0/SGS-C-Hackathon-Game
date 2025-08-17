@@ -25,6 +25,7 @@ public class CircuitCreator : CircuitCreation
     [Header("Properties")]
     public bool simulate;
     public int frameCounter = 0;
+    public bool getRowColFromDropdown = true;
 
     [Header("Level Dependent")]
     public List<List<Cell>> gridCells;
@@ -65,6 +66,13 @@ public class CircuitCreator : CircuitCreation
 
     private void Start()
     {
+        //set row col acc. to dropdown
+        if (getRowColFromDropdown)
+        {
+            CircuitGeneratorSO.rows = GameData.Instance.row;
+            CircuitGeneratorSO.columns = GameData.Instance.col;
+        }
+
         // Calculate cellSize using the parent RectTransform
         RectTransform parentRect = cellParent.GetComponent<RectTransform>();
         float parentWidth = parentRect.rect.width;
@@ -152,7 +160,7 @@ public class CircuitCreator : CircuitCreation
             TMP_Text amount = gate.GetComponentInChildren<TMP_Text>();
             amount.text = $"{gateOptions[i].amount}";
             gateOptions[i].text = amount;
-            if (MainMenu.Instance.GameType == 2
+            if (GameData.Instance.GameType == 2
                 || SceneManager.GetActiveScene().name == "Level Builder")
             {
                 gateOptions[i].text?.gameObject.SetActive(false);

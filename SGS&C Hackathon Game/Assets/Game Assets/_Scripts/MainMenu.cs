@@ -9,11 +9,7 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-    public static MainMenu Instance { get; private set; }
-
-    [Header("References")]
-
-
+    
 
     [Header("Level Buttons")]
     public GameObject ButtonPrefab;
@@ -21,21 +17,10 @@ public class MainMenu : MonoBehaviour
     public int noOfLevels;
     public string saveFolder = "Assets/Game Assets/LevelSaveSO";
 
-    [Header("Info")]
-    public int LevelClicked = 0;
-    public int GameType = 0;
+    public TMP_Dropdown rowDropdown;
+    public TMP_Dropdown colDropdown;
 
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);  // destroys the new duplicate
-            return;
-        }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
 
     private void Start()
     {
@@ -45,7 +30,30 @@ public class MainMenu : MonoBehaviour
 
         if (ButtonPrefab != null)
             InitializeButtons();
+
+
+
+        //dropdown
+        rowDropdown.ClearOptions();
+        colDropdown.ClearOptions();
+
+        // Fill rows (4 to 10)
+        List<string> rowOptions = new List<string>();
+        for (int i = 4; i <= 10; i++)
+        {
+            rowOptions.Add(i.ToString());
+        }
+        rowDropdown.AddOptions(rowOptions);
+
+        // Fill columns (10 to 20)
+        List<string> colOptions = new List<string>();
+        for (int i = 10; i <= 20; i++)
+        {
+            colOptions.Add(i.ToString());
+        }
+        colDropdown.AddOptions(colOptions);
     }
+
 
     private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)        // Champt Gpt
     {
@@ -73,9 +81,9 @@ public class MainMenu : MonoBehaviour
             // Sort by number so LevelSaveSO 0,1,2,... are in order
             numberedAssets.Sort((a, b) => a.number.CompareTo(b.number));
 
-            if (LevelClicked >= 0 && LevelClicked < numberedAssets.Count)
+            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < numberedAssets.Count)
             {
-                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[LevelClicked].guid);
+                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[GameData.Instance.LevelClicked].guid);
                 LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
 
                 var creator = FindAnyObjectByType<LevelCreationFromSO>();
@@ -86,7 +94,7 @@ public class MainMenu : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"Invalid LevelClicked index {LevelClicked}, total numbered assets = {numberedAssets.Count}");
+                Debug.LogWarning($"Invalid LevelClicked index {GameData.Instance.LevelClicked}, total numbered assets = {numberedAssets.Count}");
             }
         }
     }
@@ -155,7 +163,7 @@ public class MainMenu : MonoBehaviour
         }
         else
         {
-            LevelClicked = a;
+            GameData.Instance.LevelClicked = a;
             SceneManager.LoadScene("0");
         }
     }
@@ -189,13 +197,19 @@ public class MainMenu : MonoBehaviour
 
     public void SetGameMode(int gameMode)
     {
-        GameType = gameMode;
+        GameData.Instance.GameType = gameMode;
     }
     public void PlayClicked()
     {
-        if (GameType == 2)
+        if (GameData.Instance.GameType == 2)
         {
             SceneManager.LoadScene("Level Builder");
+
+            int selectedRow = int.Parse(rowDropdown.options[rowDropdown.value].text);
+            int selectedCol = int.Parse(colDropdown.options[colDropdown.value].text);
+
+            GameData.Instance.row = selectedRow;
+            GameData.Instance.col = selectedCol;
         }
     }
 

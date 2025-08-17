@@ -1393,8 +1393,6 @@ MonoBehaviour:
   levelButtons: []
   noOfLevels: 0
   saveFolder: Assets/Game Assets/LevelSaveSO
-  LevelClicked: 0
-  GameType: 0
 --- !u!1 &1128224451
 GameObject:
   m_ObjectHideFlags: 0
