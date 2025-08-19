@@ -131,7 +131,7 @@ public class ChemicalSpawner3 : MonoBehaviour
     // ---- Helpers ----
     private Vector3 GetMouseWorldPosition()
     {
-        if (Physics.Raycast(mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()), out RaycastHit hit, 100f, placementLayer | burnerLayer))
+        if (Physics.Raycast(mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()), out RaycastHit hit, 100f, placementLayer | burnerLayer | BlackBoard))
         {
             return hit.point;
         }

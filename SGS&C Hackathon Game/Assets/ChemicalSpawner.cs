@@ -11,7 +11,8 @@ public class ChemicalSpawner : MonoBehaviour
     public Camera mainCamera;
     public LayerMask placementLayer;
     public LayerMask burnerLayer;
-
+    public LayerMask Water;
+    public LayerMask BlackBoard;
     [Header("Temperature Settings")]
     public TextMeshProUGUI temperatureText;
     public float temperatureC = 30f;  
@@ -26,12 +27,14 @@ public class ChemicalSpawner : MonoBehaviour
     public Slider slider;
     public GameObject g4;
     public GameObject g5;
+    public GameObject Methodology;
     [Header("Steam Settings")]
     public ParticleSystem steamParticles;
     public float baseEmissionRate = 5f;     // gentle steam at low heat
     public float maxEmissionRate = 50f;     // heavy steam at boiling
     public float boilPointC = 100f;         // start maxing here
-
+    public GameObject pl3;
+ 
     void UpdateSteamEffect()
     {
         var emission = steamParticles.emission;
@@ -69,26 +72,37 @@ public class ChemicalSpawner : MonoBehaviour
         temperatureText.text = $"{temperatureC:F1}°C / {tempF:F1}°F";
     }
 
-    public void OnPlaceChemical(InputAction.CallbackContext context)
-    {
-        
-        if (context.performed && isPlacing && currentChemical != null)
+    public void OnPlaceChemical(InputAction.CallbackContext context) { 
+    if (context.performed)
         {
-            Debug.Log("yes");
             Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer))
-            {
-                
-                    currentChemical.transform.position = new Vector3(-3.43f, 4.77f, -2.29f);
+            
+                if (Physics.Raycast(ray, out RaycastHit j, 100f, Water))
+                {
+                SpawnChemical();
+    pl3.SetActive(true);
+                    Destroy(j.collider.gameObject);
+}
+if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
+{
+                // snap to fixed burner point
+
+                currentChemical.transform.position = new Vector3(-3.43f, 4.77f, -2.29f);
                 g4.SetActive(true);
                 g5.SetActive(true);
                 currentChemical = null;
-                    isPlacing = false;
-                
-                
+                isPlacing = false;
             }
+         
 
-            
+if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
+{
+
+    Methodology.SetActive(true);
+}
+            if(Physics.Raycast(ray, out RaycastHit l, 100f, burnerLayer) && currentChemical == null){
+                IncreaseTemperature();
+            }
         }
     }
 

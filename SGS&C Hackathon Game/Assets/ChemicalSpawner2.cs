@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-
+using UnityEngine.SceneManagement;
 public class ChemicalSpawner2 : MonoBehaviour
 {
     [Header("Prefab Settings")]
@@ -12,16 +12,21 @@ public class ChemicalSpawner2 : MonoBehaviour
     public LayerMask placementLayer;
     public LayerMask burnerLayer;
     public LayerMask hlayer;
+    public LayerMask Water;
+    public LayerMask sodium;
+    public LayerMask BlackBoard;
     private GameObject currentChemical;
     private bool isPlacing = false;
     private bool spawnAtMouse = true;
-    int i;
+    int i=0;
     public GameObject g1;
     public GameObject g2;
     public GameObject g3;
     public GameObject g4;
     public GameObject g5;
-
+    public GameObject Methodology;
+    public GameObject pl1;
+    public GameObject pl3;
     void Start()
     {
         // no temperature or slider setup needed
@@ -31,14 +36,14 @@ public class ChemicalSpawner2 : MonoBehaviour
     public void SpawnChemicalA()
     {
         SpawnChemical(chemicalPrefabA, true);
-        i = 0;
+      
     }
 
     public void SpawnChemicalB()
     {
         SpawnChemical(chemicalPrefabB, true);
        
-        i = 1;
+       
     }
 
     // ---- Core Spawn Method ----
@@ -58,34 +63,52 @@ public class ChemicalSpawner2 : MonoBehaviour
     // ---- Placement ----
     public void OnPlaceChemical(InputAction.CallbackContext context)
     {
-        if (context.performed && isPlacing && currentChemical != null)
+        if (context.performed)
         {
             Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (i == 0)
             {
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer))
+                if (Physics.Raycast(ray, out RaycastHit j, 100f, Water))
+                {
+                    SpawnChemicalA();
+                    pl3.SetActive(true);
+                    Destroy(j.collider.gameObject);
+                }
+                if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null) 
                 {
                     // snap to fixed burner point
 
                     currentChemical.transform.position = new Vector3(-0.4098189f, 3.182409f, -2.385961f);
-                    g5.SetActive(true);
-
+                    i = 1;
+                    pl1.SetActive(true);
+                    pl3.SetActive(false);
                     currentChemical = null;
                     isPlacing = false;
                 }
             }
             else
             {
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer))
+                if (Physics.Raycast(ray, out RaycastHit j, 100f, sodium))
+                {
+                    SpawnChemicalB();
+                    pl3.SetActive(true);
+                    Destroy(j.collider.gameObject);
+                }
+                if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
 
                     currentChemical.transform.position = new Vector3(-0.4098189f, 5.182409f, -2.385961f);
                     currentChemical.AddComponent<Rigidbody>();
                     StartCoroutine(Owarida());
-
+                    pl3.SetActive(false);
                     isPlacing = false;
                 }
+            }
+            if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
+            {
+
+                Methodology.SetActive(true);
             }
         }
     }
@@ -111,11 +134,16 @@ public class ChemicalSpawner2 : MonoBehaviour
 
     IEnumerator Owarida()
     {
-       
+
         yield return new WaitForSeconds(8f);
-        Destroy(currentChemical);
+
         yield return new WaitForSeconds(2f);
+        Destroy(currentChemical);
         g1.SetActive(false);
         g2.SetActive(true);
+    }
+    public void Load()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }
