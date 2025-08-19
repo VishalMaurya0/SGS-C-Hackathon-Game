@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a245f0ee067d88489a62af31d0c9dc2, type: 3}
+  m_Name: GateExplanationSO
+  m_EditorClassIdentifier: 
+  gateExplanations:
+  - gateType: 0
+    desc: "A NOT gate is like a switch that always flips whatever you give it:  If
+      you put in ON (1 / True) \u2192 it gives you OFF (0 / False)  If you put in
+      OFF (0 / False) \u2192 it gives you ON (1 / True). \\n Normally, if the torch
+      is lit, the door should open.  But with a NOT gate, it works the opposite way: 
+      If the torch is lit, the door stays closed.  If the torch is unlit, the door
+      opens.                                      "
+  - gateType: 1
+    desc: "An AND gate is like a door that only opens if all switches are ON at the
+      same time:  If both inputs are ON (1 / True) \u2192 Output is ON (1 / True) 
+      If even one input is OFF (0 / False) \u2192 Output is OFF (0 / False). \\n
+      Imagine there are two torches connected to a magic door:  If both torches are
+      lit, the door opens.  If only one torch is lit, the door stays closed.  If
+      both torches are unlit, the door stays closed.  So the AND gate is like a teamwork
+      lock\u2014you need all conditions met for it to activate."
+  - gateType: 2
+    desc: "An OR gate is like a door that opens if at least one switch is ON:  If
+      both inputs are OFF (0 / False) \u2192 Output is OFF (0 / False)  If one input
+      is ON (1 / True) \u2192 Output is ON (1 / True)  If both inputs are ON (1 /
+      True) \u2192 Output is still ON (1 / True). \\n Imagine there are two torches
+      connected to a magic door:  If both torches are unlit, the door stays closed. 
+      If either one torch is lit, the door opens.  If both torches are lit, the door
+      also opens.  So the OR gate is like a backup switch\u2014as long as any condition
+      is met, it will activate."
+  - gateType: 3
+    desc: "A NOR gate is like an OR gate that\u2019s been flipped by a NOT gate: 
+      If both inputs are OFF (0 / False) \u2192 Output is ON (1 / True)  If one input
+      is ON (1 / True) \u2192 Output is OFF (0 / False)  If both inputs are ON (1
+      / True) \u2192 Output is OFF (0 / False).\\nImagine there are two torches connected
+      to a magic door:  If both torches are unlit, the door opens.  If either torch
+      is lit, the door stays closed.  If both torches are lit, the door also stays
+      closed.  So the NOR gate is like a strict guardian\u2014it only allows the
+      door to open when nothing is active at all."
+  - gateType: 4
+    desc: "An XOR gate (Exclusive OR) is like an OR gate with a twist: it only turns
+      ON if exactly one input is ON.  If both inputs are OFF (0 / False) \u2192 Output
+      is OFF (0 / False)  If exactly one input is ON (1 / True) \u2192 Output is
+      ON (1 / True)  If both inputs are ON (1 / True) \u2192 Output is OFF (0 / False).\\nImagine
+      there are two torches connected to a magic door:  If both torches are unlit,
+      the door stays closed.  If only one torch is lit, the door opens.  If both
+      torches are lit, the door stays closed again.  So the XOR gate is like a \u201Cone
+      or the other, but not both\u201D rule\u2014it rewards you only if you light
+      exactly one torch."
+  - gateType: 5
+    desc: "A NAND gate is like an AND gate with a NOT gate on top\u2014it gives the
+      opposite result of AND.  If both inputs are ON (1 / True) \u2192 Output is
+      OFF (0 / False)  If even one input is OFF (0 / False) \u2192 Output is ON (1
+      / True).\\nImagine there are two torches connected to a magic door:  If both
+      torches are lit, the door stays closed.  If only one torch is lit, the door
+      opens.  If both torches are unlit, the door also opens.  So the NAND gate is
+      like a suspicious lock\u2014it refuses to open when everything is active, but
+      opens in all other cases."
