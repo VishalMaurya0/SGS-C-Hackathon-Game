@@ -47,6 +47,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Game Assets/Scenes/Chemistry/Displacement/Displacement2.unity
     guid: 5158b6b607847fa4c84801b7587d0816
+  - enabled: 1
+    path: Assets/Game Assets/Scenes/0.unity
+    guid: 51cfc37043eae834d9b89a41e1105e0f
+  - enabled: 1
+    path: Assets/Game Assets/Scenes/Level Builder.unity
+    guid: a3524316b642f5e41b89e934f3b6a2ad
+  - enabled: 1
+    path: Assets/Game Assets/Scenes/Main Menu.unity
+    guid: f4a4c8b38dd475d4985b01c2b2bcbeaf
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
