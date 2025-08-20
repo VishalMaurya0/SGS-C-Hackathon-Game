@@ -300,8 +300,15 @@ public class LevelCreationFromSO : CircuitCreation
         {
             for (int j = 0; j < gridCells[i].Count; j+=2)
             {
-                Cell cell = gridCells[i][j + (i % 2)];
-                if (cell == null) continue;
+                int index = j + (i % 2);
+
+                // Check if index is valid
+                if (index < 0 || index >= gridCells[i].Count)
+                    continue;
+
+                Cell cell = gridCells[i][index];
+                if (cell == null)
+                    continue;
 
 
                 for (int k = 0; k < 4; k++)
