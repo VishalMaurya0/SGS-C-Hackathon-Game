@@ -817,6 +817,9 @@ public class LevelCreationFromSO : CircuitCreation
             return;
         }
         if (gateOptions[selectedGateIndex].amount <= 0 || gateOptions[selectedGateIndex].gateType != selectedGateType) return;
+
+        //if (gateOptions[selectedGateIndex])TODO
+
         if (!cell.isGate && IsCellConnected(cell))
         {
             cell.isGate = true;
