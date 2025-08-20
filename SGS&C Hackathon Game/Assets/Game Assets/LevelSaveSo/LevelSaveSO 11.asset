@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27bcf195020b254419432926df510b20, type: 3}
-  m_Name: LevelSaveSO 12
+  m_Name: LevelSaveSO 11
   m_EditorClassIdentifier: 
   cellData:
   - value: 0
