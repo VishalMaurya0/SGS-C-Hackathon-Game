@@ -31,6 +31,10 @@ public class FlameSpawner : MonoBehaviour
     public Transform tr;
     public AudioClip myClip;
     public AudioClip MyClip;
+
+    public TextMeshProUGUI feedback;
+    bool ok;
+    float timer=0f;
     void Start()
     {
 
@@ -77,6 +81,7 @@ public class FlameSpawner : MonoBehaviour
                 pl2.SetActive(true);
                 isPlacing = false;
                 AudioSource.PlayClipAtPoint(myClip, tr.position);
+                
 
 
 
@@ -86,6 +91,7 @@ public class FlameSpawner : MonoBehaviour
                 Heat();
                 click += 1;
                 AudioSource.PlayClipAtPoint(myClip, tr.position);
+                ok = false;
 
             }
             if (Physics.Raycast(ray, out RaycastHit j, 10f, BlackBoard))
@@ -100,7 +106,7 @@ public class FlameSpawner : MonoBehaviour
             {
                 Destroy(h.collider.gameObject);
                 SpawnChemical();
-
+                ok = true;
                 AudioSource.PlayClipAtPoint(myClip, tr.position);
 
             }
@@ -112,12 +118,16 @@ public class FlameSpawner : MonoBehaviour
 
     void Update()
     {
-        
+
         if (isPlacing)
         {
             currentChemical.transform.position = GetMouseWorldPosition();
         }
-     
+        if (ok)
+        {
+            timer += Time.deltaTime;
+        }
+
     }
 
     private Vector3 GetMouseWorldPosition()
@@ -146,6 +156,15 @@ public class FlameSpawner : MonoBehaviour
         Destroy(currentChemical);
         Destroy(g5);
         Destroy(temp);
+        if (timer > 5f)
+        {
+            feedback.text = "Feedback: Since these metals are highly reactive, try not to expose them in air for long time.";
+
+        }
+        else
+        {
+            feedback.text = "Feedback: Experiment performed accurately.";
+        }
     }
     public void Mainmenu()
     {

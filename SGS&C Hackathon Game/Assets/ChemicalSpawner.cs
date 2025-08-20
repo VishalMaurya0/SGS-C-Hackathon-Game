@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class ChemicalSpawner : MonoBehaviour
 {
     [Header("Prefab Settings")]
@@ -135,13 +136,17 @@ if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
     }
     IEnumerator Owarida()
     {
-        started = true; 
+        started = true;
         g3 = GameObject.FindGameObjectWithTag("Sphere");
         yield return new WaitForSeconds(5f);
         g3.SetActive(false);
         yield return new WaitForSeconds(5f);
         g1.SetActive(false);
         g2.SetActive(true);
-        
+
+    }
+    public void Load()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class Benedict : MonoBehaviour
 {
     [Header("Prefab Settings")]
@@ -20,7 +21,7 @@ public class Benedict : MonoBehaviour
     public TextMeshProUGUI temperatureText;
     public float temperatureC = 30f;
     public float temperatureIncreaseStep = 5f;
-
+    public TextMeshProUGUI feedback;
     private GameObject currentChemical;
     private bool isPlacing = false;
     private bool started = false;
@@ -168,7 +169,7 @@ public class Benedict : MonoBehaviour
     IEnumerator Owarida()
     {
         started = true;
-      
+
         yield return new WaitForSeconds(2f);
         currentChemical.GetComponent<sugar>().yes();
         yield return new WaitForSeconds(10f);
@@ -176,6 +177,18 @@ public class Benedict : MonoBehaviour
         yield return new WaitForSeconds(3f);
         g1.SetActive(false);
         g2.SetActive(true);
+        if (temperatureC > 75f)
+        {
+            feedback.text = "Feedback: Try to maintain the temperature closer to 65C";
+        }
+        else
+        {
+            feedback.text = "Feedback: Experiment performed accurately";
+        }
+    }
 
+    public void Load()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using TMPro;
 public class ChemicalSpawner2 : MonoBehaviour
 {
     [Header("Prefab Settings")]
@@ -19,6 +20,7 @@ public class ChemicalSpawner2 : MonoBehaviour
     private bool isPlacing = false;
     private bool spawnAtMouse = true;
     int i=0;
+    public TextMeshProUGUI feedback;
     public GameObject g1;
     public GameObject g2;
     public GameObject g3;
@@ -27,6 +29,8 @@ public class ChemicalSpawner2 : MonoBehaviour
     public GameObject Methodology;
     public GameObject pl1;
     public GameObject pl3;
+    public float timer = 0f;
+    bool ok=false;
     void Start()
     {
         // no temperature or slider setup needed
@@ -93,6 +97,7 @@ public class ChemicalSpawner2 : MonoBehaviour
                     SpawnChemicalB();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
+                    ok = true;
                 }
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
@@ -103,6 +108,7 @@ public class ChemicalSpawner2 : MonoBehaviour
                     StartCoroutine(Owarida());
                     pl3.SetActive(false);
                     isPlacing = false;
+                    ok = false;
                 }
             }
             if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
@@ -119,6 +125,10 @@ public class ChemicalSpawner2 : MonoBehaviour
         if (isPlacing && spawnAtMouse)
         {
             currentChemical.transform.position = GetMouseWorldPosition();
+        }
+        if (ok)
+        {
+            timer += Time.deltaTime;
         }
     }
 
@@ -138,7 +148,16 @@ public class ChemicalSpawner2 : MonoBehaviour
         yield return new WaitForSeconds(8f);
 
         yield return new WaitForSeconds(2f);
-        Destroy(currentChemical);
+        if (timer > 5f)
+        {
+            feedback.text = "Feedback: Since sodium reacts with air, try not to expose sodium for long time.";
+
+        }
+        else
+        {
+            feedback.text = "Feedback: Experiment performed accurately.";
+        }
+            Destroy(currentChemical);
         g1.SetActive(false);
         g2.SetActive(true);
     }
@@ -146,4 +165,5 @@ public class ChemicalSpawner2 : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+
 }
