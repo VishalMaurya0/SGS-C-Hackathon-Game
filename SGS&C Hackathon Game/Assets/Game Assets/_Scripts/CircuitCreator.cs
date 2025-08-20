@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
@@ -182,6 +181,7 @@ public class CircuitCreator : CircuitCreation
         }
         if (gateMode && selectedGateType != gateType)
         {
+            AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
             selectedGateIndex = i;
             gateMode = true;
@@ -191,6 +191,7 @@ public class CircuitCreator : CircuitCreation
 
         if (gateMode && selectedGateType == gateType)
         {
+            AudioManager.Instance.PlayGateDeSelected();
             gateMode = false;
             gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
             return;
@@ -198,6 +199,7 @@ public class CircuitCreator : CircuitCreation
 
         if (!gateMode)
         {
+            AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
             gateMode = true;
             gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
@@ -315,6 +317,7 @@ public class CircuitCreator : CircuitCreation
 
         if (Input.GetKeyDown(KeyCode.S))
         {
+            AudioManager.Instance.PlayWon();
             CreateNewLevelSaveSO();
         }
 
@@ -452,6 +455,7 @@ public class CircuitCreator : CircuitCreation
         {
             if (currentEndCell == null || currentStartCell.connection[currentDir] || currentEndCell.connection[(currentDir + 2) % 4])
             {
+                AudioManager.Instance.PlayWireDisconnected();
                 Destroy(currentWire);
                 return;
             }
@@ -468,6 +472,8 @@ public class CircuitCreator : CircuitCreation
             endPos = currentEndCell.image.GetComponent<RectTransform>().position;
             UpdateLine();
 
+
+            AudioManager.Instance.PlayWireConnected();
 
             CheckIfConnectionsAreGood(currentEndCell, (currentDir + 2) % 4);
             CheckIfConnectionsAreGood(currentStartCell, currentDir);
@@ -652,6 +658,7 @@ public class CircuitCreator : CircuitCreation
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         rect.rotation = Quaternion.Euler(0, 0, angle);
+
     }
 
 
@@ -749,6 +756,9 @@ public class CircuitCreator : CircuitCreation
             cell.outputDir %= 4;
             cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
             CheckIfConnectionsAreGood(cell);
+
+            AudioManager.Instance.PlayGateRotated();
+
             return;
         }
         if (gateOptions[selectedGateIndex].amount <= 0)
@@ -765,6 +775,9 @@ public class CircuitCreator : CircuitCreation
             cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
             cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
             CheckIfConnectionsAreGood(cell);
+
+
+            AudioManager.Instance.PlayGatePlaced();
         }
     }
     public override void RemoveGate(Cell cell)
@@ -777,6 +790,7 @@ public class CircuitCreator : CircuitCreation
         {
             if (gateOptions[i].gateType == cell.gate)
             {
+                AudioManager.Instance.PlayWireDisconnected();
                 gateOptions[i].amount++;
                 break;
             }
@@ -922,6 +936,18 @@ public class CircuitCreator : CircuitCreation
             }
         }
         return null;
+    }
+
+    public void PLayClick()
+    {
+        if (Random.Range(0, 2) == 0)
+        {
+            AudioManager.Instance.PlayClick1();
+        }
+        else
+        {
+            AudioManager.Instance.PlayClick0();
+        }
     }
 
 }

@@ -578,6 +578,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1718035884}
+        m_TargetAssemblyTypeName: CircuitCreator, Assembly-CSharp
+        m_MethodName: PLayClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &178253679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1393,6 +1405,8 @@ MonoBehaviour:
   levelButtons: []
   noOfLevels: 0
   saveFolder: Assets/Game Assets/LevelSaveSO
+  rowDropdown: {fileID: 0}
+  colDropdown: {fileID: 0}
 --- !u!1 &1128224451
 GameObject:
   m_ObjectHideFlags: 0
@@ -2522,6 +2536,7 @@ MonoBehaviour:
   activatedCell: {fileID: 21300000, guid: 2119ab6d5bbc5ba48a6d02223ff6b971, type: 3}
   simulate: 1
   frameCounter: 0
+  getRowColFromDropdown: 1
   gateOptions: []
   cellSize: 110
   gateOptioonButtons: []

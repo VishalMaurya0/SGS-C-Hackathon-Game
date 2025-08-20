@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEditor.VersionControl;
@@ -68,7 +66,6 @@ public class LevelCreationFromSO : CircuitCreation
     public TMP_Text DescText;
     public GameObject explanationWindow;
     public GateExplanationSO GateExplanationSO;
-
 
     private void Start()
     {
@@ -410,6 +407,7 @@ public class LevelCreationFromSO : CircuitCreation
         }
         if (gateMode && selectedGateType != gateType)
         {
+            AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
             selectedGateIndex = i;
             gateMode = true;
@@ -419,6 +417,7 @@ public class LevelCreationFromSO : CircuitCreation
 
         if (gateMode && selectedGateType == gateType)
         {
+            AudioManager.Instance.PlayGateDeSelected();
             gateMode = false;
             gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
             return;
@@ -426,8 +425,8 @@ public class LevelCreationFromSO : CircuitCreation
 
         if (!gateMode)
         {
+            AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
-            selectedGateIndex = i;
             gateMode = true;
             gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
             return;
@@ -541,9 +540,10 @@ public class LevelCreationFromSO : CircuitCreation
 
         if (recheckTimer > recheckTime)
         {
+            AudioManager.Instance.PlayWon();
             levelDone = true;
             GameData.Instance.LevelClicked++;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
     }
 
@@ -551,7 +551,10 @@ public class LevelCreationFromSO : CircuitCreation
     {
         yield return new WaitForSeconds(recheckTime + 1f);
         if (!levelDone)
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        {
+            AudioManager.Instance.PlayLose();
+            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
+        }
     }
 
     private void HandleOnOffStateOfEachCell()
@@ -810,6 +813,7 @@ public class LevelCreationFromSO : CircuitCreation
             cell.outputDir %= 4;
             cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
             //CheckIfConnectionsAreGood(cell);
+            AudioManager.Instance.PlayGateRotated();
             return;
         }
         if (gateOptions[selectedGateIndex].amount <= 0 || gateOptions[selectedGateIndex].gateType != selectedGateType) return;
@@ -822,6 +826,9 @@ public class LevelCreationFromSO : CircuitCreation
             gateOptions[selectedGateIndex].amount--;
 
             RefreshAllGateText();
+
+
+            AudioManager.Instance.PlayGatePlaced();
 
             cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
             cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
@@ -857,6 +864,7 @@ public class LevelCreationFromSO : CircuitCreation
         {
             if (gateOptions[i].gateType == cell.gate)
             {
+                AudioManager.Instance.PlayWireDisconnected();
                 gateOptions[i].amount++;
                 RefreshAllGateText();
                 gateOptions[selectedGateIndex].text.text = $"{gateOptions[selectedGateIndex].amount}";
@@ -875,6 +883,18 @@ public class LevelCreationFromSO : CircuitCreation
             }
         }
         return null;
+    }
+
+
+    public void PLayClick()
+    {
+        if (Random.Range(0, 2) == 0)
+        {
+            AudioManager.Instance.PlayClick1();
+        }else
+        {
+            AudioManager.Instance.PlayClick0();
+        }
     }
 }
 

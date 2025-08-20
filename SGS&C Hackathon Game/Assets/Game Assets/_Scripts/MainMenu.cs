@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -19,6 +20,8 @@ public class MainMenu : MonoBehaviour
 
     public TMP_Dropdown rowDropdown;
     public TMP_Dropdown colDropdown;
+
+
 
 
 
@@ -226,6 +229,12 @@ public class MainMenu : MonoBehaviour
         {
             GameData.Instance.gatesToExplain.Add(new GateExplainEntry(gate, false));
         }
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        if (clip != null)
+            AudioManager.Instance.audioSource.PlayOneShot(clip);
     }
 }
 
