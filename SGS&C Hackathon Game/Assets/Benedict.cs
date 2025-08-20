@@ -7,11 +7,14 @@ using UnityEngine.UI;
 public class Benedict : MonoBehaviour
 {
     [Header("Prefab Settings")]
-    public GameObject chemicalPrefab;
+ 
     public Camera mainCamera;
     public LayerMask placementLayer;
     public LayerMask burnerLayer;
     public LayerMask hlayer;
+    public LayerMask BlackBoard;
+    public LayerMask Benedictt;
+    public LayerMask Sugar;
     int i = 0;
     [Header("Temperature Settings")]
     public TextMeshProUGUI temperatureText;
@@ -23,25 +26,27 @@ public class Benedict : MonoBehaviour
     private bool started = false;
     public GameObject g1;
     public GameObject g2;
-    public GameObject g3;
+
     public Slider slider;
     public GameObject g4;
     public GameObject g5;
     bool spawnAtMouse;
     public GameObject chemicalPrefabB;
     public GameObject chemicalPrefabA;
-
+    public GameObject pl1;
+    public GameObject pl3;
+    public GameObject Methodology;
     public void SpawnChemicalA()
     {
         SpawnChemical(chemicalPrefabA, true);
-        i = 0;
+
     }
 
     public void SpawnChemicalB()
     {
         SpawnChemical(chemicalPrefabB, true);
 
-        i = 1;
+
     }
 
     // ---- Core Spawn Method ----
@@ -66,36 +71,62 @@ public class Benedict : MonoBehaviour
     }
     public void OnPlaceChemical(InputAction.CallbackContext context)
     {
-        if (context.performed && isPlacing && currentChemical != null)
+
+        if (context.performed)
         {
+            Debug.Log("yes");
             Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (i == 0)
             {
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer))
+                if (Physics.Raycast(ray, out RaycastHit j, 100f, Benedictt))
+                {
+                    SpawnChemicalA();
+                    pl3.SetActive(true);
+                    Destroy(j.collider.gameObject);
+                }
+                if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
 
                     currentChemical.transform.position = new Vector3(-3.43f, 4.77f, -2.29f);
-                    g4.SetActive(true);
-
+                    i = 1;
+                    pl1.SetActive(true);
+                    pl3.SetActive(false);
                     currentChemical = null;
                     isPlacing = false;
                 }
             }
             else
             {
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer))
+                if (Physics.Raycast(ray, out RaycastHit j, 100f, Sugar))
+                {
+                    SpawnChemicalB();
+                    pl3.SetActive(true);
+                    Destroy(j.collider.gameObject);
+                }
+                if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
 
-                    currentChemical.transform.position = new Vector3(-3.43f, 5.77f, -2.29f);
+                    currentChemical.transform.position = new Vector3(-3.43f, 5f, -2.29f);
                     currentChemical.AddComponent<Rigidbody>();
-
-                    g5.SetActive(true);
-                    g3.SetActive(true);
+                    StartCoroutine(Owarida());
+                    pl3.SetActive(true);
                     isPlacing = false;
+                    g5.SetActive(true);
+                    g4.SetActive(true);
                 }
             }
+            if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
+            {
+
+                Methodology.SetActive(true);
+            }
+            if (Physics.Raycast(ray, out RaycastHit l, 100f, burnerLayer) && i==1)
+            {
+                IncreaseTemperature();
+            }
+
         }
     }
 
