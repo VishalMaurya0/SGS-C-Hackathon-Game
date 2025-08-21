@@ -217,7 +217,10 @@ public class MainMenu : MonoBehaviour
     {
         SceneManager.LoadScene("Main Menu");
     }
-
+    public void Back()
+    {
+        SceneManager.LoadScene("MainMainMenu");
+    }
 
     public void ResetGateKnowledge()
     {
