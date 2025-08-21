@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameData : MonoBehaviour
 {
@@ -15,7 +16,10 @@ public class GameData : MonoBehaviour
     public int GameType = 0;
     public int row = 6;
     public int col = 10;
-    
+
+
+    public AudioClip MenuMusic;
+    public AudioClip GameMusic;
 
     private void Awake()
     {
@@ -36,5 +40,13 @@ public class GameData : MonoBehaviour
                 gatesToExplain.Add(new GateExplainEntry(gate, false));
             }
         }
+
+        //if (SceneManager.GetActiveScene().name == "Main Menu") TODO
+        //{
+        //    AudioManager.Instance.PlayMusic(MenuMusic);
+        //}else
+        //{
+        //    AudioManager.Instance.PlayMusic(GameMusic);
+        //}
     }
 }
