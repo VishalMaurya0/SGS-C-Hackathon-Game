@@ -17,24 +17,20 @@ public class MainMenu : MonoBehaviour
     public List<Button> levelButtons = new();
     public int noOfLevels;
 
-    // Editor save folder (inside Assets)
-    public string editorSaveFolder = "Assets/Game Assets/LevelSaveSO";
-    // Runtime save folder (persistent)
-    public string runtimeSaveFolder = "LevelSaveSO";
-
     public TMP_Dropdown rowDropdown;
     public TMP_Dropdown colDropdown;
+
+    private List<string> levelFiles = new(); // holds paths for runtime levels
 
     private void Start()
     {
         noOfLevels = GetLevelCount();
-
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         if (ButtonPrefab != null)
             InitializeButtons();
 
-        // dropdown setup
+        // Dropdowns
         rowDropdown.ClearOptions();
         colDropdown.ClearOptions();
 
@@ -52,8 +48,8 @@ public class MainMenu : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "0")
         {
 #if UNITY_EDITOR
-            // ---------------- Editor load ----------------
-            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { editorSaveFolder });
+            // Editor loads directly from assets
+            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
             List<(string guid, int number)> numberedAssets = new();
 
             foreach (string guid in guids)
@@ -61,7 +57,6 @@ public class MainMenu : MonoBehaviour
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 string fileName = Path.GetFileNameWithoutExtension(path);
                 string[] parts = fileName.Split(' ');
-
                 if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
                     numberedAssets.Add((guid, num));
             }
@@ -77,16 +72,10 @@ public class MainMenu : MonoBehaviour
                 if (creator != null) creator.LevelSaveSO = so;
             }
 #else
-            // ---------------- Runtime load ----------------
-            string dir = Path.Combine(Application.persistentDataPath, runtimeSaveFolder);
-            if (!Directory.Exists(dir)) return;
-
-            string[] files = Directory.GetFiles(dir, "*.json");
-            Array.Sort(files);
-
-            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < files.Length)
+            // Runtime: load JSON levels (StreamingAssets + persistentDataPath)
+            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < levelFiles.Count)
             {
-                string json = File.ReadAllText(files[GameData.Instance.LevelClicked]);
+                string json = File.ReadAllText(levelFiles[GameData.Instance.LevelClicked]);
                 LevelSaveSO so = ScriptableObject.CreateInstance<LevelSaveSO>();
                 JsonUtility.FromJsonOverwrite(json, so);
 
@@ -116,8 +105,8 @@ public class MainMenu : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift))
         {
 #if UNITY_EDITOR
-            // ---------------- Editor delete ----------------
-            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { editorSaveFolder });
+            // Delete inside editor
+            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
             List<(string guid, int number)> numberedAssets = new();
 
             foreach (string guid in guids)
@@ -125,7 +114,6 @@ public class MainMenu : MonoBehaviour
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 string fileName = Path.GetFileNameWithoutExtension(path);
                 string[] parts = fileName.Split(' ');
-
                 if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
                     numberedAssets.Add((guid, num));
             }
@@ -144,17 +132,11 @@ public class MainMenu : MonoBehaviour
                 }
             }
 #else
-            // ---------------- Runtime delete ----------------
-            string dir = Path.Combine(Application.persistentDataPath, runtimeSaveFolder);
-            if (!Directory.Exists(dir)) return;
-
-            string[] files = Directory.GetFiles(dir, "*.json");
-            Array.Sort(files);
-
-            if (a >= 0 && a < files.Length)
+            // Delete runtime JSON file
+            if (a >= 0 && a < levelFiles.Count)
             {
-                File.Delete(files[a]);
-                Debug.Log($"[RUNTIME] Deleted {files[a]}");
+                File.Delete(levelFiles[a]);
+                Debug.Log($"[RUNTIME] Deleted {levelFiles[a]}");
                 RefreshButtons();
             }
 #endif
@@ -178,8 +160,7 @@ public class MainMenu : MonoBehaviour
     public int GetLevelCount()
     {
 #if UNITY_EDITOR
-        if (!editorSaveFolder.EndsWith("/")) editorSaveFolder += "/";
-        string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { editorSaveFolder });
+        string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
 
         int count = 0;
         foreach (string guid in guids)
@@ -187,14 +168,29 @@ public class MainMenu : MonoBehaviour
             string path = AssetDatabase.GUIDToAssetPath(guid);
             string fileName = Path.GetFileNameWithoutExtension(path);
             string[] parts = fileName.Split(' ');
-
             if (parts.Length > 1 && int.TryParse(parts[^1], out _)) count++;
         }
         return count;
 #else
-        string dir = Path.Combine(Application.persistentDataPath, runtimeSaveFolder);
-        if (!Directory.Exists(dir)) return 0;
-        return Directory.GetFiles(dir, "*.json").Length;
+        levelFiles.Clear();
+
+        // 1. Built-in levels (StreamingAssets)
+        string streamingDir = Path.Combine(Application.streamingAssetsPath, "Levels");
+        if (Directory.Exists(streamingDir))
+        {
+            foreach (var file in Directory.GetFiles(streamingDir, "*.json"))
+                levelFiles.Add(file);
+        }
+
+        // 2. Player-created levels (persistentDataPath)
+        string runtimeDir = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+        if (Directory.Exists(runtimeDir))
+        {
+            foreach (var file in Directory.GetFiles(runtimeDir, "*.json"))
+                levelFiles.Add(file);
+        }
+
+        return levelFiles.Count;
 #endif
     }
 
