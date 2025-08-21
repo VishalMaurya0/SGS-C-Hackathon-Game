@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -65,6 +67,7 @@ public class CircuitCreator : CircuitCreation
 
     private void Start()
     {
+        Debug.Log($"[RUNTIME] persistentDataPath: {Application.persistentDataPath}");
         //set row col acc. to dropdown
         if (getRowColFromDropdown)
         {
@@ -398,12 +401,71 @@ public class CircuitCreator : CircuitCreation
             Directory.CreateDirectory(directory);
         }
 
-        string path = Path.Combine(directory, fileName + ".json");
+        // Create unique, numbered filename so levels are discoverable and ordered (global max across StreamingAssets and runtime dirs)
+        int maxIndex = -1;
+        int ExtractNum(string name)
+        {
+            string[] parts = name.Split(' ');
+            if (parts.Length > 1)
+            {
+                int num;
+                if (int.TryParse(parts[parts.Length - 1], out num))
+                    return num;
+            }
+            return -1;
+        }
+
+        try
+        {
+            // StreamingAssets
+            string streamingDir = Path.Combine(Application.streamingAssetsPath, "Levels");
+            if (Directory.Exists(streamingDir))
+            {
+                foreach (var f in Directory.GetFiles(streamingDir, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+
+            // Runtime (legacy)
+            string legacyDir = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+            if (Directory.Exists(legacyDir))
+            {
+                foreach (var f in Directory.GetFiles(legacyDir, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+
+            // Runtime (current)
+            if (Directory.Exists(directory))
+            {
+                foreach (var f in Directory.GetFiles(directory, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+        }
+        catch { }
+
+        int nextIndex = maxIndex + 1;
+
+        string path = Path.Combine(directory, $"Level {nextIndex}.json");
 
         string json = JsonUtility.ToJson(asset, true);
-        File.WriteAllText(path, json);
-
-        Debug.Log($"[RUNTIME] Saved LevelSaveSO to {path}");
+        try
+        {
+            File.WriteAllText(path, json);
+            bool exists = File.Exists(path);
+            Debug.Log($"[RUNTIME] Save folder: {directory}\nSaved Level: {path}\nExists after write: {exists}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[RUNTIME] Failed to save level to {path}: {ex}");
+        }
 #endif
     }
 
@@ -987,6 +1049,12 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayClick0();
         }
+    }
+
+    // Expose a button-callable save for builds
+    public void SaveLevelRuntime()
+    {
+        CreateNewLevelSaveSO();
     }
 
 }

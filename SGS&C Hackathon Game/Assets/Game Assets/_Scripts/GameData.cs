@@ -13,6 +13,7 @@ public class GameData : MonoBehaviour
 
     [Header("Info")]
     public int LevelClicked = 0;
+    public int noOfLevels;
     public int GameType = 0;
     public int row = 6;
     public int col = 10;

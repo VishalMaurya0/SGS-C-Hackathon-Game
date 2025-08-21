@@ -1,7 +1,10 @@
+using NUnit.Framework.Interfaces;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -508,8 +511,10 @@ public class LevelCreationFromSO : CircuitCreation
     Coroutine reset;
     private void CheckOutput()
     {
-        TimerVisual.gameObject.SetActive(false);
-
+        if (!hardMode)
+        {
+            TimerVisual.gameObject.SetActive(false);
+        }
 
         for (int i = 0; i < gridCells.Count; i++)
         {
@@ -549,18 +554,25 @@ public class LevelCreationFromSO : CircuitCreation
             AudioManager.Instance.PlayWon();
             levelDone = true;
             GameData.Instance.LevelClicked++;
+            if (GameData.Instance.LevelClicked >= GameData.Instance.noOfLevels)
+            {
+                GameData.Instance.LevelClicked = 0;
+            }
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
     }
 
     IEnumerator Reset()
     {
+        TimerVisual.gameObject.SetActive(true);
+        TimerVisual.text = "Checking...";
         yield return new WaitForSeconds(recheckTime + 1f);
         if (!levelDone)
         {
             AudioManager.Instance.PlayLose();
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
+            //TimerVisual.gameObject.SetActive(false);
     }
 
     private void HandleOnOffStateOfEachCell()

@@ -25,6 +25,7 @@ public class MainMenu : MonoBehaviour
     private void Start()
     {
         noOfLevels = GetLevelCount();
+        GameData.Instance.noOfLevels = noOfLevels;  
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         if (ButtonPrefab != null)
@@ -154,6 +155,7 @@ public class MainMenu : MonoBehaviour
         levelButtons.Clear();
 
         noOfLevels = GetLevelCount();
+        GameData.Instance.noOfLevels = noOfLevels;
         InitializeButtons();
     }
 
@@ -183,15 +185,45 @@ public class MainMenu : MonoBehaviour
         }
 
         // 2. Player-created levels (persistentDataPath)
-        string runtimeDir = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+        // Support both legacy folder name and current one
+        string runtimeDirLegacy = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+        if (Directory.Exists(runtimeDirLegacy))
+        {
+            foreach (var file in Directory.GetFiles(runtimeDirLegacy, "*.json"))
+                levelFiles.Add(file);
+        }
+
+        string runtimeDir = Path.Combine(Application.persistentDataPath, "LevelSaves");
         if (Directory.Exists(runtimeDir))
         {
             foreach (var file in Directory.GetFiles(runtimeDir, "*.json"))
                 levelFiles.Add(file);
         }
 
+        // Sort by trailing number in file name (e.g., "Level 3"), else by name
+        levelFiles.Sort((x, y) =>
+        {
+            int nx = ExtractTrailingNumber(Path.GetFileNameWithoutExtension(x));
+            int ny = ExtractTrailingNumber(Path.GetFileNameWithoutExtension(y));
+            if (nx != int.MaxValue || ny != int.MaxValue)
+                return nx.CompareTo(ny);
+            return string.Compare(Path.GetFileName(x), Path.GetFileName(y), StringComparison.OrdinalIgnoreCase);
+        });
+
         return levelFiles.Count;
 #endif
+    }
+
+    private int ExtractTrailingNumber(string name)
+    {
+        string[] parts = name.Split(' ');
+        if (parts.Length > 1)
+        {
+            int num;
+            if (int.TryParse(parts[parts.Length - 1], out num))
+                return num;
+        }
+        return int.MaxValue;
     }
 
     public void SetGameMode(int gameMode) => GameData.Instance.GameType = gameMode;
