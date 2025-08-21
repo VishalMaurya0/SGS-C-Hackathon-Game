@@ -340,6 +340,8 @@ public class CircuitCreator : CircuitCreation
         asset.cellSize = cellSize;
         asset.rows = gridCells.Count;
         asset.cols = gridCells[0].Count;
+        // Default new runtime levels to last by priority
+        asset.priority = 1_000_000f;
 
         for (int i = 0; i < gridCells.Count; i++)
         {

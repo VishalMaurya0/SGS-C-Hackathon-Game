@@ -25,7 +25,6 @@ public class MainMenu : MonoBehaviour
     private void Start()
     {
         noOfLevels = GetLevelCount();
-        GameData.Instance.noOfLevels = noOfLevels;  
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         if (ButtonPrefab != null)
@@ -49,24 +48,23 @@ public class MainMenu : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "0")
         {
 #if UNITY_EDITOR
-            // Editor loads directly from assets
+            // Editor: order by LevelSaveSO.priority
             string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
-            List<(string guid, int number)> numberedAssets = new();
+            List<(string guid, float priority)> ordered = new();
 
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                string fileName = Path.GetFileNameWithoutExtension(path);
-                string[] parts = fileName.Split(' ');
-                if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
-                    numberedAssets.Add((guid, num));
+                LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
+                float prio = ExtractPriorityFromAsset(so);
+                ordered.Add((guid, prio));
             }
 
-            numberedAssets.Sort((a, b) => a.number.CompareTo(b.number));
+            ordered.Sort((a, b) => a.priority.CompareTo(b.priority));
 
-            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < numberedAssets.Count)
+            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < ordered.Count)
             {
-                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[GameData.Instance.LevelClicked].guid);
+                string path = AssetDatabase.GUIDToAssetPath(ordered[GameData.Instance.LevelClicked].guid);
                 LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
 
                 var creator = FindAnyObjectByType<LevelCreationFromSO>();
@@ -106,24 +104,23 @@ public class MainMenu : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift))
         {
 #if UNITY_EDITOR
-            // Delete inside editor
+            // Delete inside editor (ordered by priority)
             string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
-            List<(string guid, int number)> numberedAssets = new();
+            List<(string guid, float priority)> ordered = new();
 
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                string fileName = Path.GetFileNameWithoutExtension(path);
-                string[] parts = fileName.Split(' ');
-                if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
-                    numberedAssets.Add((guid, num));
+                LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
+                float prio = ExtractPriorityFromAsset(so);
+                ordered.Add((guid, prio));
             }
 
-            numberedAssets.Sort((x, y) => x.number.CompareTo(y.number));
+            ordered.Sort((x, y) => x.priority.CompareTo(y.priority));
 
-            if (a >= 0 && a < numberedAssets.Count)
+            if (a >= 0 && a < ordered.Count)
             {
-                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[a].guid);
+                string path = AssetDatabase.GUIDToAssetPath(ordered[a].guid);
                 if (AssetDatabase.DeleteAsset(path))
                 {
                     AssetDatabase.SaveAssets();
@@ -162,17 +159,9 @@ public class MainMenu : MonoBehaviour
     public int GetLevelCount()
     {
 #if UNITY_EDITOR
+        // Editor: count by assets, but order elsewhere by priority
         string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
-
-        int count = 0;
-        foreach (string guid in guids)
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            string[] parts = fileName.Split(' ');
-            if (parts.Length > 1 && int.TryParse(parts[^1], out _)) count++;
-        }
-        return count;
+        return guids.Length;
 #else
         levelFiles.Clear();
 
@@ -200,13 +189,13 @@ public class MainMenu : MonoBehaviour
                 levelFiles.Add(file);
         }
 
-        // Sort by trailing number in file name (e.g., "Level 3"), else by name
+        // Sort by priority from JSON (ascending). Fallback: alphabetical if no priority.
         levelFiles.Sort((x, y) =>
         {
-            int nx = ExtractTrailingNumber(Path.GetFileNameWithoutExtension(x));
-            int ny = ExtractTrailingNumber(Path.GetFileNameWithoutExtension(y));
-            if (nx != int.MaxValue || ny != int.MaxValue)
-                return nx.CompareTo(ny);
+            int px = ExtractPriorityFromJson(x);
+            int py = ExtractPriorityFromJson(y);
+            if (px != int.MaxValue || py != int.MaxValue)
+                return px.CompareTo(py);
             return string.Compare(Path.GetFileName(x), Path.GetFileName(y), StringComparison.OrdinalIgnoreCase);
         });
 
@@ -214,15 +203,23 @@ public class MainMenu : MonoBehaviour
 #endif
     }
 
-    private int ExtractTrailingNumber(string name)
+    private int ExtractPriorityFromAsset(LevelSaveSO so)
     {
-        string[] parts = name.Split(' ');
-        if (parts.Length > 1)
+        try { return so != null ? so.priority : int.MaxValue; } catch { return int.MaxValue; }
+    }
+
+    [System.Serializable]
+    private class LevelMeta { public int priority; }
+
+    private int ExtractPriorityFromJson(string filePath)
+    {
+        try
         {
-            int num;
-            if (int.TryParse(parts[parts.Length - 1], out num))
-                return num;
+            string json = File.ReadAllText(filePath);
+            var meta = JsonUtility.FromJson<LevelMeta>(json);
+            if (meta != null) return meta.priority;
         }
+        catch { }
         return int.MaxValue;
     }
 

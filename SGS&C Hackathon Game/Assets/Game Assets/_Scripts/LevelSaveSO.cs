@@ -10,6 +10,7 @@ public class LevelSaveSO : ScriptableObject
     public float cellSize;
     public int rows;
     public int cols;
+    public float priority;
 }
 
 
