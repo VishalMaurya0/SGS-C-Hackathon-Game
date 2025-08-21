@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class CircuitCreator : CircuitCreation
 {
@@ -324,37 +324,23 @@ public class CircuitCreator : CircuitCreation
     }
 
 
-    private void CreateNewLevelSaveSO()
+    //[SerializeField] private string editorSaveFolder = "Assets/LevelSaves"; // Editor folder
+    [SerializeField] private string runtimeSaveFolder = "LevelSaves";       // Relative folder inside persistentDataPath
+    [SerializeField] private string fileName = "LevelSaveSO";               // Base name
+
+    public void CreateNewLevelSaveSO()
     {
-        // Create the ScriptableObject instance
+        // Create ScriptableObject instance
         LevelSaveSO asset = ScriptableObject.CreateInstance<LevelSaveSO>();
 
-        // Ensure folder exists
-        if (!AssetDatabase.IsValidFolder(saveFolder))
-        {
-            AssetDatabase.CreateFolder("Assets", "LevelSaves");
-        }
-
-        // Unique file name
-        string path = AssetDatabase.GenerateUniqueAssetPath($"{saveFolder}/LevelSaveSO.asset");
-
-        // Save asset
-        AssetDatabase.CreateAsset(asset, path);
-        AssetDatabase.SaveAssets();
-
-        Debug.Log($"Created new LevelSaveSO at {path}");
-        Selection.activeObject = asset; // Optional: auto-select the new asset
-
-        //asset.gateOptions = gateOptions;
-        //asset.gridCells = gridCells;
-        //asset.inputData = inputs;
+        // Fill data
         asset.cellSize = cellSize;
         asset.rows = gridCells.Count;
         asset.cols = gridCells[0].Count;
 
         for (int i = 0; i < gridCells.Count; i++)
         {
-            asset.outputData.Add(gridCells[i][gridCells[0].Count - 1].value == 0 ? false : true);
+            asset.outputData.Add(gridCells[i][gridCells[0].Count - 1].value != 0);
         }
 
         asset.inputData.Clear();
@@ -388,8 +374,61 @@ public class CircuitCreator : CircuitCreation
                 asset.cellData.Add(data);
             }
         }
-        EditorUtility.SetDirty(asset);
+
+#if UNITY_EDITOR
+        // ---------------- Editor Save (.asset) ----------------
+        if (!AssetDatabase.IsValidFolder(saveFolder))
+        {
+            AssetDatabase.CreateFolder("Assets", "LevelSaves");
+        }
+
+        string path = AssetDatabase.GenerateUniqueAssetPath($"{saveFolder}/{fileName}.asset");
+
+        AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
+        EditorUtility.SetDirty(asset);
+        Selection.activeObject = asset;
+
+        Debug.Log($"[EDITOR] Created new LevelSaveSO at {path}");
+#else
+        // ---------------- Runtime Save (.json) ----------------
+        string directory = Path.Combine(Application.persistentDataPath, runtimeSaveFolder);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        string path = Path.Combine(directory, fileName + ".json");
+
+        string json = JsonUtility.ToJson(asset, true);
+        File.WriteAllText(path, json);
+
+        Debug.Log($"[RUNTIME] Saved LevelSaveSO to {path}");
+#endif
+    }
+
+    // ---------------- Load Runtime JSON ----------------
+    public LevelSaveSO LoadLevelSaveSO()
+    {
+#if UNITY_EDITOR
+        Debug.LogWarning("Use .asset files in the Editor instead of loading JSON.");
+        return null;
+#else
+        string path = Path.Combine(Application.persistentDataPath, runtimeSaveFolder, fileName + ".json");
+
+        if (!File.Exists(path))
+        {
+            Debug.LogError($"[RUNTIME] No save file found at {path}");
+            return null;
+        }
+
+        string json = File.ReadAllText(path);
+        LevelSaveSO loaded = ScriptableObject.CreateInstance<LevelSaveSO>();
+        JsonUtility.FromJsonOverwrite(json, loaded);
+
+        Debug.Log($"[RUNTIME] Loaded LevelSaveSO from {path}");
+        return loaded;
+#endif
     }
 
 

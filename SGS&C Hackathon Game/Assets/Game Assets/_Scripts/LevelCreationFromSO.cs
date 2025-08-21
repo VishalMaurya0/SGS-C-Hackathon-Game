@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -825,7 +824,12 @@ public class LevelCreationFromSO : CircuitCreation
         }
         if (gateOptions[selectedGateIndex].amount <= 0 || gateOptions[selectedGateIndex].gateType != selectedGateType) return;
 
-        //if (gateOptions[selectedGateIndex])TODO
+        if (GetGateBehaviour(selectedGateType).noOfInputs + 1 > GetCellConnections(cell))
+        {
+            Debug.Log(cell.connection.Count);
+            Debug.Log(GetGateBehaviour(selectedGateType).noOfInputs + 1);
+            return;
+        }
 
         if (!cell.isGate && IsCellConnected(cell))
         {
@@ -843,6 +847,19 @@ public class LevelCreationFromSO : CircuitCreation
             cell.gateGameobject = Instantiate(GetGateBehaviour(selectedGateType).prefab, cell.image.transform);
             cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
             //CheckIfConnectionsAreGood(cell);
+        }
+
+        int GetCellConnections(Cell cell)
+        {
+            int a = 0;
+            for (global::System.Int32 i = 0; i < 4; i++)
+            {
+                if (cell.connection[i])
+                {
+                    a++;
+                }
+            }
+            return a;
         }
     }
 

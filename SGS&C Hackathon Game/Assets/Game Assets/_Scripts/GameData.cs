@@ -41,12 +41,12 @@ public class GameData : MonoBehaviour
             }
         }
 
-        if (SceneManager.GetActiveScene().name == "Main Menu")
-        {
-            AudioManager.Instance.PlayMusic(MenuMusic);
-        }else
-        {
-            AudioManager.Instance.PlayMusic(GameMusic);
-        }
+        //if (SceneManager.GetActiveScene().name == "Main Menu") TODO
+        //{
+        //    AudioManager.Instance.PlayMusic(MenuMusic);
+        //}else
+        //{
+        //    AudioManager.Instance.PlayMusic(GameMusic);
+        //}
     }
 }
