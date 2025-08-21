@@ -388,3 +388,4 @@ MonoBehaviour:
   cellSize: 161.96358
   rows: 5
   cols: 10
+  priority: 16

@@ -178,6 +178,12 @@ public class CircuitCreator : CircuitCreation
 
     private void GateOptionButtonClicked(gates gateType, int i)
     {
+        // Don't allow selection if no gates of this type are available
+        if (gateOptions[i].amount <= 0)
+        {
+            return;
+        }
+
         for (int j = 0; j < gateOptioonButtons.Count; j++)
         {
             gateOptionButtonImages[j].color = normalcolor;
@@ -188,7 +194,7 @@ public class CircuitCreator : CircuitCreation
             selectedGateType = gateType;
             selectedGateIndex = i;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
 
@@ -196,7 +202,7 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayGateDeSelected();
             gateMode = false;
-            gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
+            gateOptionButtonImages[i].color = normalcolor;
             return;
         }
 
@@ -205,7 +211,7 @@ public class CircuitCreator : CircuitCreation
             AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
     }

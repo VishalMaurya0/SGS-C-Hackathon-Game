@@ -19,12 +19,20 @@ public class MainMenu : MonoBehaviour
 
     public TMP_Dropdown rowDropdown;
     public TMP_Dropdown colDropdown;
+    public TMP_Text LearningsText;
+
+    [Header("Level Completion Colors")]
+    public Color levelFullyCompletedColor;
+    public Color levelEasyPartiallyCompletedColor;
+    public Color levelHardPartiallyCompletedColor;
+    public Color levelNotCompletedColor;
 
     private List<string> levelFiles = new(); // holds paths for runtime levels
 
     private void Start()
     {
         noOfLevels = GetLevelCount();
+        GameData.Instance.noOfLevels = noOfLevels;
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         if (ButtonPrefab != null)
@@ -41,6 +49,14 @@ public class MainMenu : MonoBehaviour
         List<string> colOptions = new();
         for (int i = 10; i <= 20; i++) colOptions.Add(i.ToString());
         colDropdown.AddOptions(colOptions);
+    }
+
+    void Update()
+    {
+        if (LearningsText != null)
+        {   
+            LearningsText.text = $"Learnings: {GameData.Instance.learnings}";
+        }
     }
 
     private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -93,7 +109,39 @@ public class MainMenu : MonoBehaviour
             btn.SetActive(true);
             levelButtons.Add(btn.GetComponent<Button>());
 
-            levelButtons[i].GetComponentInChildren<TMP_Text>().text = $"{i}";
+            // Get completion status for this level
+            var (easyCompleted, hardCompleted) = GameData.Instance.GetLevelCompletionStatus(i);
+            
+            // Create button text with completion indicators
+            string buttonText = $"{i}";
+            if (easyCompleted || hardCompleted)
+            {
+                // buttonText += "\n";
+                // if (easyCompleted) buttonText += "✓";
+                // if (hardCompleted) buttonText += "★";
+            }
+            
+            levelButtons[i].GetComponentInChildren<TMP_Text>().text = buttonText;
+            
+            // Change button color based on completion status
+            var buttonImage = levelButtons[i].GetComponent<Image>();
+            if (easyCompleted && hardCompleted)
+            {
+                buttonImage.color = levelFullyCompletedColor; // Both completed
+            }
+            else if (easyCompleted && !hardCompleted)
+            {
+                buttonImage.color = levelEasyPartiallyCompletedColor; // One mode completed
+            }
+            else if (!easyCompleted && hardCompleted)
+            {
+                buttonImage.color = levelHardPartiallyCompletedColor; // One mode completed
+            }
+            else
+            {
+                buttonImage.color = levelNotCompletedColor; // Not completed
+            }
+            
             int a = i;
             levelButtons[i].onClick.AddListener(() => { OnLevelButtonClicked(a); });
         }
@@ -194,7 +242,7 @@ public class MainMenu : MonoBehaviour
         {
             int px = ExtractPriorityFromJson(x);
             int py = ExtractPriorityFromJson(y);
-            if (px != int.MaxValue || py != int.MaxValue)
+            if (px != (float)int.MaxValue || py != (float)int.MaxValue)
                 return px.CompareTo(py);
             return string.Compare(Path.GetFileName(x), Path.GetFileName(y), StringComparison.OrdinalIgnoreCase);
         });
@@ -203,9 +251,9 @@ public class MainMenu : MonoBehaviour
 #endif
     }
 
-    private int ExtractPriorityFromAsset(LevelSaveSO so)
+    private float ExtractPriorityFromAsset(LevelSaveSO so)
     {
-        try { return so != null ? so.priority : int.MaxValue; } catch { return int.MaxValue; }
+        try { return so != null ? so.priority : (float)int.MaxValue; } catch { return int.MaxValue; }
     }
 
     [System.Serializable]
