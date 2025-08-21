@@ -169,7 +169,7 @@ public class CircuitCreator : CircuitCreation
             }
 
             gateOptioonButtons.Add(gate.AddComponent<Button>());
-            gateOptionButtonImages.Add(gate.GetComponent<Image>());
+            gateOptionButtonImages.Add(gate.GetComponentInChildren<Image>());
             gates gateType = gateOptions[i].gateType;
             int a = i;
             gateOptioonButtons[i].onClick.AddListener(() => { GateOptionButtonClicked(gateType, a); });

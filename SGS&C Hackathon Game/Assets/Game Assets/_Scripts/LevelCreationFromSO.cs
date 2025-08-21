@@ -557,7 +557,7 @@ public class LevelCreationFromSO : CircuitCreation
                 {
                     reset = StartCoroutine(Reset());
                 }
-                GameData.Instance.ShowFeedback("You can't leave any gates!", false);
+                GameData.Instance.ShowFeedback("You can't leave any gates!", false, true);
                 return;
             }
         }
@@ -577,8 +577,15 @@ public class LevelCreationFromSO : CircuitCreation
             
             // Stop periodic feedback before scene change
             GameData.Instance.StopPeriodicFeedback();
-            
-            GameData.Instance.ShowFeedback("Good Job! I need to make Levels Harder!", true);
+
+            if (Random.Range(0, 10) < 2)
+            {
+                GameData.Instance.ShowFeedback("Good Job! I need to make Levels Harder!", true, true);
+            }
+            else
+            {
+                GameData.Instance.ShowFeedback("Good Job!!", true, true);
+            }
             
             // Mark current level as completed
             GameData.Instance.MarkLevelCompleted(GameData.Instance.LevelClicked);
@@ -603,7 +610,7 @@ public class LevelCreationFromSO : CircuitCreation
             // Stop periodic feedback before scene change
             GameData.Instance.StopPeriodicFeedback();
             
-            GameData.Instance.ShowFeedback("Just Close!! Try Again!", false);
+            GameData.Instance.ShowFeedback("Just Close!! Try Again!", false, true);
             AudioManager.Instance.PlayLose();
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
@@ -881,7 +888,7 @@ public class LevelCreationFromSO : CircuitCreation
         {
             if (gridCells[i].Contains(cell) && gridCells[i].IndexOf(cell) == 0)
             {
-                //TODO message of ...
+                GameData.Instance.ShowFeedback("You can't place a gate on a cell directly connected to a source!", false, true);
 
                 return;
             }
@@ -892,6 +899,7 @@ public class LevelCreationFromSO : CircuitCreation
         {
             Debug.Log(GetCellConnection(cell));
             Debug.Log(GetGateBehaviour(selectedGateType).noOfInputs + 1);
+            GameData.Instance.ShowFeedback("Number of inputs doesn't match to the gate!", false, true);
             return;
         }
 
@@ -1020,9 +1028,9 @@ public class LevelCreationFromSO : CircuitCreation
 
         var (easyCompleted, hardCompleted) = GameData.Instance.GetLevelCompletionStatus(GameData.Instance.LevelClicked);
         
-        string statusText = $"Level {GameData.Instance.LevelClicked + 1} Status:\n";
-        statusText += $"Easy Mode: {(easyCompleted ? "✓ Completed" : "✗ Not Completed")}\n";
-        statusText += $"Hard Mode: {(hardCompleted ? "✓ Completed" : "✗ Not Completed")}";
+        string statusText = $"Level {GameData.Instance.LevelClicked} Status:\t";
+        statusText += $"Easy Mode: {(easyCompleted ? " Completed" : " Not Completed")}\t";
+        statusText += $"Hard Mode: {(hardCompleted ? " Completed" : " Not Completed")}";
         
         completionStatusText.text = statusText;
 

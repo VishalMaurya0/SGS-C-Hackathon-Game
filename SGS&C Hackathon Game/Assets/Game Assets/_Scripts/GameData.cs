@@ -87,6 +87,11 @@ public class GameData : MonoBehaviour
         {   
             LearningsText.text = $"Learnings: {learnings}";
         }
+
+        if (FeedbackPanel == null && SceneManager.GetActiveScene().name == "0")
+        {
+            FeedbackPanel = GameObject.FindWithTag("FeedBack");
+        }
     }
 
     public void StartPeriodicFeedback()
@@ -136,9 +141,25 @@ public class GameData : MonoBehaviour
             StopCoroutine(feedbackCoroutine);
         }
 
+        if (FeedbackPanel == null)
+        {
+            FeedbackPanel = GameObject.FindWithTag("FeedBack");
+        }
+
+        if (FeedbackPanel == null)
+        {
+            return;
+        }
+
         FeedbackPanel.SetActive(true);
         FeedbackPanel.GetComponentInChildren<TMP_Text>().text = feedback;
         int childCount = FeedbackPanel.transform.childCount - 1;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            FeedbackPanel.transform.GetChild(i).gameObject.SetActive(false);
+        }
+
         int randomIndex = UnityEngine.Random.Range(1, childCount);
         if (won) randomIndex = 0;
         FeedbackPanel.transform.GetChild(randomIndex).gameObject.SetActive(true);

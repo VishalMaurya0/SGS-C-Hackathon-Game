@@ -9009,7 +9009,21 @@ MonoBehaviour:
   row: 0
   col: 0
   learnings: 0
+  FeedbackPanel: {fileID: 0}
   LearningsText: {fileID: 839170315}
+  periodicFeedbackMessages:
+  - You're doing great!
+  - You've got this!
+  - Almost there!
+  - You're learning fast!
+  - Nice work!
+  - Stay focused!
+  - You're on fire! Keep Thinking!
+  - Brilliant! Keep going!
+  - Amazing progress! Keep going!
+  - You're getting better! Keep going!
+  - You can Rotate The Gate by selecting the gate and clicking on the cell
+  - You can Remove The Gate by Right Clicking
   MenuMusic: {fileID: 8300000, guid: f3af87f00fff90845aae4cd40fe96dd4, type: 3}
   GameMusic: {fileID: 8300000, guid: f3af87f00fff90845aae4cd40fe96dd4, type: 3}
 --- !u!4 &1691292017
