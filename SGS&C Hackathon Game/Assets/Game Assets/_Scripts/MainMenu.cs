@@ -240,9 +240,10 @@ public class MainMenu : MonoBehaviour
         // Sort by priority from JSON (ascending). Fallback: alphabetical if no priority.
         levelFiles.Sort((x, y) =>
         {
-            int px = ExtractPriorityFromJson(x);
-            int py = ExtractPriorityFromJson(y);
-            if (px != (float)int.MaxValue || py != (float)int.MaxValue)
+            float px = ExtractPriorityFromJson(x);
+            float py = ExtractPriorityFromJson(y);
+            // If either file has a valid priority, sort by priority; otherwise, sort alphabetically
+            if (px != float.MaxValue || py != float.MaxValue)
                 return px.CompareTo(py);
             return string.Compare(Path.GetFileName(x), Path.GetFileName(y), StringComparison.OrdinalIgnoreCase);
         });
@@ -257,9 +258,9 @@ public class MainMenu : MonoBehaviour
     }
 
     [System.Serializable]
-    private class LevelMeta { public int priority; }
+    private class LevelMeta { public float priority; }
 
-    private int ExtractPriorityFromJson(string filePath)
+    private float ExtractPriorityFromJson(string filePath)
     {
         try
         {
@@ -268,7 +269,7 @@ public class MainMenu : MonoBehaviour
             if (meta != null) return meta.priority;
         }
         catch { }
-        return int.MaxValue;
+        return float.MaxValue;
     }
 
     public void SetGameMode(int gameMode) => GameData.Instance.GameType = gameMode;

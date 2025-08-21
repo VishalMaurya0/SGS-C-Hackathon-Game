@@ -210,6 +210,7 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
+            selectedGateIndex = i;
             gateMode = true;
             gateOptionButtonImages[i].color = clickedcolor;
             return;
@@ -859,8 +860,11 @@ public class CircuitCreator : CircuitCreation
     }
     public override void MakeGate(Cell cell)
     {
+        Debug.Log($"[CircuitCreator] Attempting to place gate on cell. IsGate: {cell.isGate}, IsSource: {cell.isSource}");
+        
         if (cell.isGate)
         {
+            Debug.Log($"[CircuitCreator] Cell already has a gate. Rotating existing gate.");
             cell.outputDir++;
             cell.outputDir %= 4;
             cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
@@ -872,10 +876,12 @@ public class CircuitCreator : CircuitCreation
         }
         if (gateOptions[selectedGateIndex].amount <= 0)
         {
+            Debug.LogWarning($"[CircuitCreator] No gates of type {selectedGateType} available! Amount: {gateOptions[selectedGateIndex].amount}");
             return;
         }
         if (!cell.isGate)
         {
+            Debug.Log($"[CircuitCreator] Successfully placing {selectedGateType} gate!");
             cell.isGate = true;
             cell.gate = selectedGateType;
             cell.outputDir = 0;
@@ -887,6 +893,10 @@ public class CircuitCreator : CircuitCreation
 
 
             AudioManager.Instance.PlayGatePlaced();
+        }
+        else
+        {
+            Debug.LogWarning($"[CircuitCreator] Cell already has a gate but we're trying to place another one!");
         }
     }
     public override void RemoveGate(Cell cell)

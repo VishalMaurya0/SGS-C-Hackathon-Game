@@ -29,6 +29,7 @@ public class GameData : MonoBehaviour
     public GameObject FeedbackPanel;
     public Coroutine feedbackCoroutine;
     public TMP_Text LearningsText;
+    public bool gameStarted;
 
     [Header("Periodic Feedback")]
     public List<string> periodicFeedbackMessages = new List<string>
@@ -36,15 +37,17 @@ public class GameData : MonoBehaviour
         "You're doing great!",
         "You've got this!",
         "Almost there!",
-        "You're learning fast!",
-        "Nice work!",
         "Stay focused!",
         "You're on fire! Keep Thinking!",
-        "Brilliant! Keep going!",
         "Amazing progress! Keep going!",
         "You're getting better! Keep going!",
         "You can Rotate The Gate by selecting the gate and clicking on the cell",
         "You can Remove The Gate by Right Clicking",
+        "You can Make Your Own Levels in the Explore Mode",
+        "Click on the Gate to Rotate the Output",
+        "Newly Placed Gate Will Always Have the output in the Right Dir if Wire Connected",
+        "You can Learn The Controls in the HELP Section",
+        "The RightMost Column Should match Output Column",
     };
     private Coroutine periodicFeedbackCoroutine;
     private float lastPeriodicFeedbackTime;
@@ -62,6 +65,8 @@ public class GameData : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        // Keep UI references fresh on scene changes
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Only initialize once
         if (gatesToExplain.Count == 0)
@@ -88,10 +93,42 @@ public class GameData : MonoBehaviour
             LearningsText.text = $"Learnings: {learnings}";
         }
 
-        if (FeedbackPanel == null && SceneManager.GetActiveScene().name == "0")
+        // Try to bind the FeedbackPanel in the current scene (works even if it's inactive)
+        if (FeedbackPanel == null)
         {
-            FeedbackPanel = GameObject.FindWithTag("FeedBack");
+            FeedbackPanel = FindFeedbackPanelInActiveScene();
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Refresh reference after every scene load
+        FeedbackPanel = FindFeedbackPanelInActiveScene();
+    }
+
+    private GameObject FindFeedbackPanelInActiveScene()
+    {
+        // 1) Try active objects by tag
+        var go = GameObject.FindWithTag("FeedBack");
+        if (go != null) return go;
+
+        // 2) Include inactive scene objects as well
+        foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
+        {
+            if (t != null && t.CompareTag("FeedBack") && t.gameObject.scene.IsValid() && t.gameObject.scene == SceneManager.GetActiveScene())
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
     }
 
     public void StartPeriodicFeedback()
@@ -143,11 +180,12 @@ public class GameData : MonoBehaviour
 
         if (FeedbackPanel == null)
         {
-            FeedbackPanel = GameObject.FindWithTag("FeedBack");
+            FeedbackPanel = FindFeedbackPanelInActiveScene();
         }
 
         if (FeedbackPanel == null)
         {
+            Debug.LogWarning("[GameData] FeedbackPanel with tag 'FeedBack' not found in the active scene. Ensure it's tagged correctly and exists in this scene.");
             return;
         }
 
