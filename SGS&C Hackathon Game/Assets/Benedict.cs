@@ -194,15 +194,16 @@ public class Benedict : MonoBehaviour
         {
             feedback.text = "Feedback: Experiment performed accurately";
         }
-    }
-
-    public void Load()
-    {
         if (!yes)
         {
             yes = true;
             MainMenui.reactions += 1;
         }
+    }
+
+    public void Load()
+    {
+        
         SceneManager.LoadScene("MainMenu");
     }
 }

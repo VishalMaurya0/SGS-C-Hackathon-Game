@@ -154,16 +154,16 @@ public class ChemicalSpawner : MonoBehaviour
         g1.SetActive(false);
         g2.SetActive(true);
         Destroy(temp);
-        
-
-    }
-    public void Load()
-    {
         if (!yes)
         {
             MainMenui.reactions += 1;
             yes = true;
         }
+
+    }
+    public void Load()
+    {
+        
         SceneManager.LoadScene("MainMenu");
     }
 }

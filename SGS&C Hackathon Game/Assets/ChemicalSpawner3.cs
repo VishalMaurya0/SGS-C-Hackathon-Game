@@ -157,9 +157,6 @@ public class ChemicalSpawner3 : MonoBehaviour
         yield return new WaitForSeconds(9f);
         g1.SetActive(false);
         g2.SetActive(true);
-    }
-    public void Load()
-    {
         if (SceneManager.GetActiveScene().name == "Displacement1" && !yes1)
         {
             yes1 = true;
@@ -180,6 +177,10 @@ public class ChemicalSpawner3 : MonoBehaviour
             yes4 = true;
             MainMenui.reactions += 1;
         }
+    }
+    public void Load()
+    {
+        
         
         SceneManager.LoadScene("MainMenu");
     }

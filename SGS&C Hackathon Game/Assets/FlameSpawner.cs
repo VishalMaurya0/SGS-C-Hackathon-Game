@@ -169,10 +169,8 @@ public class FlameSpawner : MonoBehaviour
         else
         {
             feedback.text = "Feedback: Experiment performed accurately.";
+
         }
-    }
-    public void Mainmenu()
-    {
         if (SceneManager.GetActiveScene().name == "Lithium" && !yes1)
         {
             yes1 = true;
@@ -198,6 +196,10 @@ public class FlameSpawner : MonoBehaviour
             yes5 = true;
             MainMenui.reactions += 1;
         }
+    }
+    public void Mainmenu()
+    {
+        
         SceneManager.LoadScene("MainMenu");
     }
 }
