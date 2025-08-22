@@ -1,101 +1,103 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MainMenu : MonoBehaviour
 {
-    
-
     [Header("Level Buttons")]
     public GameObject ButtonPrefab;
     public List<Button> levelButtons = new();
     public int noOfLevels;
-    public string saveFolder = "Assets/Game Assets/LevelSaveSO";
 
     public TMP_Dropdown rowDropdown;
     public TMP_Dropdown colDropdown;
+    public TMP_Text LearningsText;
 
+    [Header("Level Completion Colors")]
+    public Color levelFullyCompletedColor;
+    public Color levelEasyPartiallyCompletedColor;
+    public Color levelHardPartiallyCompletedColor;
+    public Color levelNotCompletedColor;
 
+    private List<string> levelFiles = new(); // holds paths for runtime levels
 
     private void Start()
     {
-        noOfLevels = GetAssetCountInPath();
-
+        noOfLevels = GetLevelCount();
+        GameData.Instance.noOfLevels = noOfLevels;
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
         if (ButtonPrefab != null)
             InitializeButtons();
 
-
-
-        //dropdown
+        // Dropdowns
         rowDropdown.ClearOptions();
         colDropdown.ClearOptions();
 
-        // Fill rows (4 to 10)
-        List<string> rowOptions = new List<string>();
-        for (int i = 4; i <= 10; i++)
-        {
-            rowOptions.Add(i.ToString());
-        }
+        List<string> rowOptions = new();
+        for (int i = 4; i <= 10; i++) rowOptions.Add(i.ToString());
         rowDropdown.AddOptions(rowOptions);
 
-        // Fill columns (10 to 20)
-        List<string> colOptions = new List<string>();
-        for (int i = 10; i <= 20; i++)
-        {
-            colOptions.Add(i.ToString());
-        }
+        List<string> colOptions = new();
+        for (int i = 10; i <= 20; i++) colOptions.Add(i.ToString());
         colDropdown.AddOptions(colOptions);
     }
 
+    void Update()
+    {
+        if (LearningsText != null)
+        {
+            LearningsText.text = $"Learnings: {GameData.Instance.learnings}";
+        }
+    }
 
-    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)        // Champt Gpt
+    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
         if (SceneManager.GetActiveScene().name == "0")
         {
-            // Get all asset GUIDs in the save folder
-            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { saveFolder });
-
-            // Convert to (path, name) and filter only numbered ones
-            List<(string guid, int number)> numberedAssets = new();
+#if UNITY_EDITOR
+            // Editor: order by LevelSaveSO.priority
+            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
+            List<(string guid, float priority)> ordered = new();
 
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-
-                // Try to parse number from the file name
-                string[] parts = fileName.Split(' ');
-                if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
-                {
-                    numberedAssets.Add((guid, num));
-                }
+                LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
+                float prio = ExtractPriorityFromAsset(so);
+                ordered.Add((guid, prio));
             }
 
-            // Sort by number so LevelSaveSO 0,1,2,... are in order
-            numberedAssets.Sort((a, b) => a.number.CompareTo(b.number));
+            ordered.Sort((a, b) => a.priority.CompareTo(b.priority));
 
-            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < numberedAssets.Count)
+            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < ordered.Count)
             {
-                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[GameData.Instance.LevelClicked].guid);
+                string path = AssetDatabase.GUIDToAssetPath(ordered[GameData.Instance.LevelClicked].guid);
                 LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
 
                 var creator = FindAnyObjectByType<LevelCreationFromSO>();
-                if (creator != null)
-                {
-                    creator.LevelSaveSO = so;
-                }
+                if (creator != null) creator.LevelSaveSO = so;
             }
-            else
+#else
+            // Runtime: load JSON levels (StreamingAssets + persistentDataPath)
+            if (GameData.Instance.LevelClicked >= 0 && GameData.Instance.LevelClicked < levelFiles.Count)
             {
-                Debug.LogWarning($"Invalid LevelClicked index {GameData.Instance.LevelClicked}, total numbered assets = {numberedAssets.Count}");
+                string json = File.ReadAllText(levelFiles[GameData.Instance.LevelClicked]);
+                LevelSaveSO so = ScriptableObject.CreateInstance<LevelSaveSO>();
+                JsonUtility.FromJsonOverwrite(json, so);
+
+                var creator = FindAnyObjectByType<LevelCreationFromSO>();
+                if (creator != null) creator.LevelSaveSO = so;
             }
+#endif
         }
     }
 
@@ -103,11 +105,42 @@ public class MainMenu : MonoBehaviour
     {
         for (int i = 0; i < noOfLevels; i++)
         {
-            GameObject btn = Instantiate(ButtonPrefab, ButtonPrefab.transform.parent.transform);
+            GameObject btn = Instantiate(ButtonPrefab, ButtonPrefab.transform.parent);
             btn.SetActive(true);
             levelButtons.Add(btn.GetComponent<Button>());
 
-            levelButtons[i].GetComponentInChildren<TMP_Text>().text = $"{i}";
+            // Get completion status for this level
+            var (easyCompleted, hardCompleted) = GameData.Instance.GetLevelCompletionStatus(i);
+
+            // Create button text with completion indicators
+            string buttonText = $"{i}";
+            if (easyCompleted || hardCompleted)
+            {
+                // buttonText += "\n";
+                // if (easyCompleted) buttonText += "✓";
+                // if (hardCompleted) buttonText += "★";
+            }
+
+            levelButtons[i].GetComponentInChildren<TMP_Text>().text = buttonText;
+
+            // Change button color based on completion status
+            var buttonImage = levelButtons[i].GetComponent<Image>();
+            if (easyCompleted && hardCompleted)
+            {
+                buttonImage.color = levelFullyCompletedColor; // Both completed
+            }
+            else if (easyCompleted && !hardCompleted)
+            {
+                buttonImage.color = levelEasyPartiallyCompletedColor; // One mode completed
+            }
+            else if (!easyCompleted && hardCompleted)
+            {
+                buttonImage.color = levelHardPartiallyCompletedColor; // One mode completed
+            }
+            else
+            {
+                buttonImage.color = levelNotCompletedColor; // Not completed
+            }
 
             int a = i;
             levelButtons[i].onClick.AddListener(() => { OnLevelButtonClicked(a); });
@@ -116,50 +149,43 @@ public class MainMenu : MonoBehaviour
 
     private void OnLevelButtonClicked(int a)
     {
-        if (Input.GetKey(KeyCode.LeftShift))   
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            // Find the corresponding asset
-            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { saveFolder });
-            List<(string guid, int number)> numberedAssets = new();
+#if UNITY_EDITOR
+            // Delete inside editor (ordered by priority)
+            string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
+            List<(string guid, float priority)> ordered = new();
 
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-
-                string[] parts = fileName.Split(' ');
-                if (parts.Length > 1 && int.TryParse(parts[^1], out int num))
-                {
-                    numberedAssets.Add((guid, num));
-                }
+                LevelSaveSO so = AssetDatabase.LoadAssetAtPath<LevelSaveSO>(path);
+                float prio = ExtractPriorityFromAsset(so);
+                ordered.Add((guid, prio));
             }
 
-            numberedAssets.Sort((x, y) => x.number.CompareTo(y.number));
+            ordered.Sort((x, y) => x.priority.CompareTo(y.priority));
 
-            if (a >= 0 && a < numberedAssets.Count)
+            if (a >= 0 && a < ordered.Count)
             {
-                string path = AssetDatabase.GUIDToAssetPath(numberedAssets[a].guid);
-                bool success = AssetDatabase.DeleteAsset(path);
-                if (success)
+                string path = AssetDatabase.GUIDToAssetPath(ordered[a].guid);
+                if (AssetDatabase.DeleteAsset(path))
                 {
                     AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
                     Debug.Log($"Deleted LevelSaveSO at index {a}: {path}");
-
-                    // Also refresh buttons in UI
-                    foreach (var btn in levelButtons)
-                    {
-                        Destroy(btn.gameObject);
-                    }
-                    levelButtons.Clear();
-                    noOfLevels = GetAssetCountInPath();
-                    InitializeButtons();
-                }
-                else
-                {
-                    Debug.LogWarning($"Failed to delete LevelSaveSO {path}");
+                    RefreshButtons();
                 }
             }
+#else
+            // Delete runtime JSON file
+            if (a >= 0 && a < levelFiles.Count)
+            {
+                File.Delete(levelFiles[a]);
+                Debug.Log($"[RUNTIME] Deleted {levelFiles[a]}");
+                RefreshButtons();
+            }
+#endif
         }
         else
         {
@@ -168,37 +194,86 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-
-    public int GetAssetCountInPath()
+    private void RefreshButtons()
     {
-        // Ensure path ends with "/"
-        if (!saveFolder.EndsWith("/")) saveFolder += "/";
+        foreach (var btn in levelButtons) Destroy(btn.gameObject);
+        levelButtons.Clear();
 
-        // Get all LevelSaveSO assets
-        string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { saveFolder });
+        noOfLevels = GetLevelCount();
+        GameData.Instance.noOfLevels = noOfLevels;
+        InitializeButtons();
+    }
 
-        int count = 0;
-        foreach (string guid in guids)
+    public int GetLevelCount()
+    {
+#if UNITY_EDITOR
+        // Editor: count by assets, but order elsewhere by priority
+        string[] guids = AssetDatabase.FindAssets("t:LevelSaveSO", new[] { "Assets/Game Assets/LevelSaveSO" });
+        return guids.Length;
+#else
+        levelFiles.Clear();
+
+        // 1. Built-in levels (StreamingAssets)
+        string streamingDir = Path.Combine(Application.streamingAssetsPath, "Levels");
+        if (Directory.Exists(streamingDir))
         {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-
-            // Only count those with a number at the end (e.g. "LevelSaveSO 0")
-            string[] parts = fileName.Split(' ');
-            if (parts.Length > 1 && int.TryParse(parts[^1], out _))
-            {
-                count++;
-            }
+            foreach (var file in Directory.GetFiles(streamingDir, "*.json"))
+                levelFiles.Add(file);
         }
 
-        return count;
+        // 2. Player-created levels (persistentDataPath)
+        // Support both legacy folder name and current one
+        string runtimeDirLegacy = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+        if (Directory.Exists(runtimeDirLegacy))
+        {
+            foreach (var file in Directory.GetFiles(runtimeDirLegacy, "*.json"))
+                levelFiles.Add(file);
+        }
+
+        string runtimeDir = Path.Combine(Application.persistentDataPath, "LevelSaves");
+        if (Directory.Exists(runtimeDir))
+        {
+            foreach (var file in Directory.GetFiles(runtimeDir, "*.json"))
+                levelFiles.Add(file);
+        }
+
+        // Sort by priority from JSON (ascending). Fallback: alphabetical if no priority.
+        levelFiles.Sort((x, y) =>
+        {
+            float px = ExtractPriorityFromJson(x);
+            float py = ExtractPriorityFromJson(y);
+            // If either file has a valid priority, sort by priority; otherwise, sort alphabetically
+            if (px != float.MaxValue || py != float.MaxValue)
+                return px.CompareTo(py);
+            return string.Compare(Path.GetFileName(x), Path.GetFileName(y), StringComparison.OrdinalIgnoreCase);
+        });
+
+        return levelFiles.Count;
+#endif
     }
 
-
-    public void SetGameMode(int gameMode)
+    private float ExtractPriorityFromAsset(LevelSaveSO so)
     {
-        GameData.Instance.GameType = gameMode;
+        try { return so != null ? so.priority : (float)int.MaxValue; } catch { return int.MaxValue; }
     }
+
+    [System.Serializable]
+    private class LevelMeta { public float priority; }
+
+    private float ExtractPriorityFromJson(string filePath)
+    {
+        try
+        {
+            string json = File.ReadAllText(filePath);
+            var meta = JsonUtility.FromJson<LevelMeta>(json);
+            if (meta != null) return meta.priority;
+        }
+        catch { }
+        return float.MaxValue;
+    }
+
+    public void SetGameMode(int gameMode) => GameData.Instance.GameType = gameMode;
+
     public void PlayClicked()
     {
         if (GameData.Instance.GameType == 2)
@@ -213,10 +288,7 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void Home()
-    {
-        SceneManager.LoadScene("Main Menu");
-    }
+    public void Home() => SceneManager.LoadScene("Main Menu");
     public void Back()
     {
         SceneManager.LoadScene("MainMainMenu");
@@ -226,12 +298,14 @@ public class MainMenu : MonoBehaviour
     {
         GameData.Instance.gatesToExplain.Clear();
         foreach (gates gate in Enum.GetValues(typeof(gates)))
-        {
             GameData.Instance.gatesToExplain.Add(new GateExplainEntry(gate, false));
-        }
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        if (clip != null) AudioManager.Instance.audioSource.PlayOneShot(clip);
     }
 }
-
 
 [System.Serializable]
 public class GateExplainEntry
@@ -239,10 +313,9 @@ public class GateExplainEntry
     public gates gateType;
     public bool explained;
 
-    public GateExplainEntry(gates gates, bool explained)
+    public GateExplainEntry(gates gate, bool explained)
     {
-        this.gateType = gates;
+        this.gateType = gate;
         this.explained = explained;
     }
-
 }

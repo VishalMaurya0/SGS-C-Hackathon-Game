@@ -1,0 +1,924 @@
+{
+    "cellData": [
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                true,
+                false,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                true,
+                false,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                true,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                true
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                true,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                true,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                true,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                true,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 99,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": 5,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 98,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 97,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": true,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                true,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": false,
+            "gate": 0,
+            "isGate": false,
+            "outputDir": 0,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                true,
+                false
+            ]
+        }
+    ],
+    "inputData": [
+        {
+            "value": 0,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 0,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                false,
+                false,
+                false,
+                false
+            ]
+        },
+        {
+            "value": 100,
+            "isSource": true,
+            "sourceID": -1,
+            "connections": [
+                true,
+                false,
+                false,
+                false
+            ]
+        }
+    ],
+    "outputData": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ],
+    "cellSize": 143.0514373779297,
+    "rows": 6,
+    "cols": 10,
+    "priority": 7.0
+}

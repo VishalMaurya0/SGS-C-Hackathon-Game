@@ -13,172 +13,116 @@ MonoBehaviour:
   m_Name: LevelSaveSO 18
   m_EditorClassIdentifier: 
   cellData:
+  - value: 99
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: 0
+    connections: 01000100
+  - value: 98
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000101
+  - value: 97
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 96
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 95
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 94
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 93
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 92
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 91
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 90
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 89
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 00000100
   - value: 0
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
-    sourceID: -1
-    connections: 00000000
+    sourceID: 1
+    connections: 01000100
   - value: 0
     isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 50
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01000001
-  - value: 50
-    isSource: 0
-    gate: 3
+    gate: 1
     isGate: 1
-    outputDir: 2
+    outputDir: 0
+    sourceID: -1
+    connections: 01010100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
     sourceID: -1
     connections: 01000100
   - value: 0
@@ -223,27 +167,111 @@ MonoBehaviour:
     outputDir: 0
     sourceID: -1
     connections: 00000100
+  - value: 99
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: 2
+    connections: 01000100
+  - value: 98
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 97
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 3
+    isGate: 1
+    outputDir: 0
+    sourceID: -1
+    connections: 01000101
   - value: 0
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
-    connections: 00000000
+    connections: 01000100
   - value: 0
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
-    connections: 00000000
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
+  - value: 0
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 00000100
+  - value: 99
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: 3
+    connections: 01000100
+  - value: 50
+    isSource: 0
+    gate: 1
+    isGate: 1
+    outputDir: 0
+    sourceID: -1
+    connections: 01000101
+  - value: 50
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: -1
+    connections: 01000100
   - value: 49
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
-    connections: 01010001
+    connections: 01010100
   - value: 48
     isSource: 0
     gate: 0
@@ -293,210 +321,77 @@ MonoBehaviour:
     outputDir: 0
     sourceID: -1
     connections: 00000100
-  - value: 0
+  - value: 99
+    isSource: 0
+    gate: 0
+    isGate: 0
+    outputDir: 0
+    sourceID: 4
+    connections: 01000100
+  - value: 98
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 48
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00010001
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 50
-    isSource: 0
-    gate: 2
-    isGate: 1
-    outputDir: 3
-    sourceID: -1
-    connections: 01010001
-  - value: 0
+    connections: 01010100
+  - value: 97
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
+  - value: 96
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
+  - value: 95
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
+  - value: 94
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
+  - value: 93
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
+  - value: 92
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000100
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 00000000
-  - value: 50
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01010000
-  - value: 49
+  - value: 91
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 48
+  - value: 90
     isSource: 0
     gate: 0
     isGate: 0
     outputDir: 0
     sourceID: -1
     connections: 01000100
-  - value: 47
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01000100
-  - value: 46
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01000100
-  - value: 45
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01000100
-  - value: 44
-    isSource: 0
-    gate: 0
-    isGate: 0
-    outputDir: 0
-    sourceID: -1
-    connections: 01000100
-  - value: 43
+  - value: 89
     isSource: 0
     gate: 0
     isGate: 0
@@ -504,35 +399,28 @@ MonoBehaviour:
     sourceID: -1
     connections: 00000100
   inputData:
+  - value: 100
+    isSource: 1
+    sourceID: -1
+    connections: 01000000
   - value: 0
     isSource: 1
     sourceID: -1
-    connections: 00000000
-  - value: 0
+    connections: 01000000
+  - value: 100
     isSource: 1
     sourceID: -1
-    connections: 00000000
-  - value: 0
+    connections: 01000000
+  - value: 100
     isSource: 1
     sourceID: -1
-    connections: 00000000
-  - value: 0
+    connections: 01000000
+  - value: 100
     isSource: 1
     sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 1
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 1
-    sourceID: -1
-    connections: 00000000
-  - value: 0
-    isSource: 1
-    sourceID: -1
-    connections: 00000000
-  outputData: 00000001000001
-  cellSize: 122.61552
-  rows: 7
-  cols: 10
+    connections: 01000000
+  outputData: 0100000101
+  cellSize: 147.23961
+  rows: 5
+  cols: 11
+  priority: 18

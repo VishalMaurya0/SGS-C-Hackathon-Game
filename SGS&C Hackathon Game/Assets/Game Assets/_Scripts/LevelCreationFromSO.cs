@@ -1,7 +1,12 @@
+using NUnit.Framework.Interfaces;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -66,6 +71,11 @@ public class LevelCreationFromSO : CircuitCreation
     public GameObject explanationWindow;
     public GateExplanationSO GateExplanationSO;
 
+    [Header("Level Completion UI")]
+    public TMP_Text completionStatusText;
+    public GameObject easyCompletedIcon;
+    public GameObject hardCompletedIcon;
+
     private void Start()
     {
         GetValuesFromSO();
@@ -93,10 +103,16 @@ public class LevelCreationFromSO : CircuitCreation
             WhatToDoObj.SetActive(true);
             GameData.Instance.isFirst = false;
         }
+
+        UpdateCompletionStatusDisplay();
+        
+        // Start periodic feedback to make the game feel alive
+        //GameData.Instance.StartPeriodicFeedback();
     }
 
     private void GateExplanation()
     {
+        if (GameData.Instance.isFirst) return;
         for (int i = 0; i < gateOptions.Count; i++)
         {
             for (int j = 0; j < GameData.Instance.gatesToExplain.Count; j++)
@@ -396,7 +412,7 @@ public class LevelCreationFromSO : CircuitCreation
             }
             
             gateOptioonButtons.Add(gate.AddComponent<Button>());
-            gateOptionButtonImages.Add(gate.GetComponent<Image>());
+            gateOptionButtonImages.Add(gate.GetComponentInChildren<Image>());
             gates gateType = gateOptions[i].gateType;
             int a = i;
             gateOptioonButtons[i].onClick.AddListener(() => { GateOptionButtonClicked(gateType, a); });
@@ -407,6 +423,12 @@ public class LevelCreationFromSO : CircuitCreation
 
     private void GateOptionButtonClicked(gates gateType, int i)
     {
+        // Don't allow selection if no gates of this type are available
+        if (gateOptions[i].amount <= 0)
+        {
+            return;
+        }
+
         for (int j = 0; j < gateOptioonButtons.Count; j++)
         {
             gateOptionButtonImages[j].color = normalcolor;
@@ -417,7 +439,7 @@ public class LevelCreationFromSO : CircuitCreation
             selectedGateType = gateType;
             selectedGateIndex = i;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
 
@@ -425,7 +447,7 @@ public class LevelCreationFromSO : CircuitCreation
         {
             AudioManager.Instance.PlayGateDeSelected();
             gateMode = false;
-            gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
+            gateOptionButtonImages[i].color = normalcolor;
             return;
         }
 
@@ -433,8 +455,9 @@ public class LevelCreationFromSO : CircuitCreation
         {
             AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
+            selectedGateIndex = i;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
     }
@@ -508,8 +531,10 @@ public class LevelCreationFromSO : CircuitCreation
     Coroutine reset;
     private void CheckOutput()
     {
-        TimerVisual.gameObject.SetActive(false);
-
+        if (!hardMode)
+        {
+            TimerVisual.gameObject.SetActive(false);
+        }
 
         for (int i = 0; i < gridCells.Count; i++)
         {
@@ -522,7 +547,6 @@ public class LevelCreationFromSO : CircuitCreation
                 {
                     reset = StartCoroutine(Reset());
                 }
-                Debug.Log("Output Not Maching!");
                 return;
             }
         }
@@ -535,11 +559,15 @@ public class LevelCreationFromSO : CircuitCreation
                 {
                     reset = StartCoroutine(Reset());
                 }
-                Debug.Log("Gates Still Present!");
+                GameData.Instance.ShowFeedback("You can't leave any gates!", false);
                 return;
             }
         }
         TimerVisual.gameObject.SetActive(true);
+        if (Random.Range(0, 40) < 10)
+        {
+            GameData.Instance.ShowFeedback("Hmmm, Let's Check!!", false);
+        }
         recheckTimer += Time.deltaTime * 3;
         TimerVisual.text = $"{(recheckTime - recheckTimer).ToString("F2")}";
 
@@ -548,19 +576,47 @@ public class LevelCreationFromSO : CircuitCreation
         {
             AudioManager.Instance.PlayWon();
             levelDone = true;
+            
+            // Stop periodic feedback before scene change
+            GameData.Instance.StopPeriodicFeedback();
+
+            if (Random.Range(0, 10) < 2)
+            {
+                GameData.Instance.ShowFeedback("Good Job! I need to make Levels Harder!", true, true);
+            }
+            else
+            {
+                GameData.Instance.ShowFeedback("Good Job!!", true, true);
+            }
+            
+            // Mark current level as completed
+            GameData.Instance.MarkLevelCompleted(GameData.Instance.LevelClicked);
+            
             GameData.Instance.LevelClicked++;
+            //GameData.Instance.noOfLevels = 
+            if (GameData.Instance.LevelClicked >= GameData.Instance.noOfLevels)
+            {
+                GameData.Instance.LevelClicked = 0;
+            }
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
     }
 
     IEnumerator Reset()
     {
+        TimerVisual.gameObject.SetActive(true);
+        TimerVisual.text = "Checking...";
         yield return new WaitForSeconds(recheckTime + 1f);
         if (!levelDone)
         {
+            // Stop periodic feedback before scene change
+            GameData.Instance.StopPeriodicFeedback();
+            
+            GameData.Instance.ShowFeedback("Just Close!! Try Again!", false, true);
             AudioManager.Instance.PlayLose();
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
         }
+            //TimerVisual.gameObject.SetActive(false);
     }
 
     private void HandleOnOffStateOfEachCell()
@@ -813,26 +869,65 @@ public class LevelCreationFromSO : CircuitCreation
     public override void MakeGate(Cell cell)
     {
         if (cell.isSource) return;
+        Debug.Log($"[Gate Placement] Attempting to place gate on cell at position. IsSource: {cell.isSource}");
+
         if (cell.isGate)
         {
+            Debug.Log($"[Gate Placement] Cell already has a gate. Rotating existing gate.");
             cell.outputDir++;
             cell.outputDir %= 4;
             cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
             //CheckIfConnectionsAreGood(cell);
             AudioManager.Instance.PlayGateRotated();
+            // Orient it if not
+            if (!cell.connection[cell.outputDir])
+            {
+                RotateCellAuto(cell);
+            }
             return;
         }
+        Debug.Log($"[Gate Placement] Gate availability check - Selected: {selectedGateType}, Available: {gateOptions[selectedGateIndex].amount}, Index: {selectedGateIndex}");
         if (gateOptions[selectedGateIndex].amount <= 0 || gateOptions[selectedGateIndex].gateType != selectedGateType) return;
 
-        if (GetGateBehaviour(selectedGateType).noOfInputs + 1 > GetCellConnections(cell))
+        if (gateOptions[selectedGateIndex].amount <= 0)
         {
-            Debug.Log(cell.connection.Count);
-            Debug.Log(GetGateBehaviour(selectedGateType).noOfInputs + 1);
+            Debug.LogWarning($"[Gate Placement] No gates of type {selectedGateType} available!");
             return;
         }
 
+        if (gateOptions[selectedGateIndex].gateType != selectedGateType)
+        {
+            Debug.LogWarning($"[Gate Placement] Gate type mismatch! Selected: {selectedGateType}, Available: {gateOptions[selectedGateIndex].gateType}");
+            return;
+        }
+
+        //Cant place to cell directly connected to source
+        for (int i = 0; i < gridCells.Count; i++)
+        {
+            if (gridCells[i].Contains(cell) && gridCells[i].IndexOf(cell) == 0)
+            {
+                Debug.LogWarning($"[Gate Placement] Cannot place gate on cell directly connected to source! Row: {i}, Col: 0");
+                GameData.Instance.ShowFeedback("You can't place a gate on a cell directly connected to a source!", false, true);
+
+                return;
+            }
+        }
+
+        int cellConnections = GetCellConnection(cell);
+        int requiredConnections = GetGateBehaviour(selectedGateType).noOfInputs + 1;
+        Debug.Log($"[Gate Placement] Connection check - Cell connections: {cellConnections}, Required: {requiredConnections}");
+
+        if (GetGateBehaviour(selectedGateType).noOfInputs + 1 != GetCellConnection(cell))
+        {
+            Debug.LogWarning($"[Gate Placement] Connection mismatch! Cell has {GetCellConnection(cell)} connections, but {selectedGateType} gate needs {GetGateBehaviour(selectedGateType).noOfInputs + 1} connections");
+            GameData.Instance.ShowFeedback("Number of inputs doesn't match to the gate!", false, true);
+            return;
+        }
+
+        Debug.Log($"[Gate Placement] Cell connection check - IsConnected: {IsCellConnected(cell)}");
         if (!cell.isGate && IsCellConnected(cell))
         {
+            Debug.Log($"[Gate Placement] Successfully placing {selectedGateType} gate!");
             cell.isGate = true;
             cell.gate = selectedGateType;
             cell.outputDir = 0;
@@ -848,8 +943,20 @@ public class LevelCreationFromSO : CircuitCreation
             cell.gateGameobject.GetComponentInChildren<TMP_Text>().gameObject.SetActive(false);
             //CheckIfConnectionsAreGood(cell);
         }
+        else
+        {
+            Debug.LogWarning($"[Gate Placement] Cell is not connected! Cannot place gate.");
+        }
 
-        int GetCellConnections(Cell cell)
+
+        // Orient it if not
+        if (!cell.connection[cell.outputDir])
+        {
+            Debug.Log($"[Gate Placement] Auto-rotating gate to find valid output direction");
+            RotateCellAuto(cell);
+        }
+
+        int GetCellConnection(Cell cell)
         {
             int a = 0;
             for (global::System.Int32 i = 0; i < 4; i++)
@@ -860,6 +967,25 @@ public class LevelCreationFromSO : CircuitCreation
                 }
             }
             return a;
+        }
+    }
+
+    private void RotateCellAuto(Cell cell)
+    {
+        if (cell.isSource) return;
+        if (cell.isGate)
+        {
+            cell.outputDir++;
+            cell.outputDir %= 4;
+            cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
+            //CheckIfConnectionsAreGood(cell);
+            AudioManager.Instance.PlayGateRotated();
+            return;
+        }
+
+        if (!cell.connection[cell.outputDir])
+        {
+            RotateCellAuto(cell);
         }
     }
 
@@ -921,6 +1047,35 @@ public class LevelCreationFromSO : CircuitCreation
         }else
         {
             AudioManager.Instance.PlayClick0();
+        }
+    }
+
+    public void StartGame()
+    {
+        GameData.Instance.StartPeriodicFeedback();
+    }
+
+    private void UpdateCompletionStatusDisplay()
+    {
+        if (completionStatusText == null) return;
+
+        var (easyCompleted, hardCompleted) = GameData.Instance.GetLevelCompletionStatus(GameData.Instance.LevelClicked);
+        
+        string statusText = $"Level {GameData.Instance.LevelClicked} Status:\t";
+        statusText += $"Easy Mode: {(easyCompleted ? " Completed" : " Not Completed")}\t";
+        statusText += $"Hard Mode: {(hardCompleted ? " Completed" : " Not Completed")}";
+        
+        completionStatusText.text = statusText;
+
+        // Update completion icons if they exist
+        if (easyCompletedIcon != null)
+        {
+            easyCompletedIcon.SetActive(easyCompleted);
+        }
+        
+        if (hardCompletedIcon != null)
+        {
+            hardCompletedIcon.SetActive(hardCompleted);
         }
     }
 }

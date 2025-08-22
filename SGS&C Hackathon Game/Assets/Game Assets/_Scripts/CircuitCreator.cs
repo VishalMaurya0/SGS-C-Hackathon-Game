@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -65,6 +67,7 @@ public class CircuitCreator : CircuitCreation
 
     private void Start()
     {
+        Debug.Log($"[RUNTIME] persistentDataPath: {Application.persistentDataPath}");
         //set row col acc. to dropdown
         if (getRowColFromDropdown)
         {
@@ -166,7 +169,7 @@ public class CircuitCreator : CircuitCreation
             }
 
             gateOptioonButtons.Add(gate.AddComponent<Button>());
-            gateOptionButtonImages.Add(gate.GetComponent<Image>());
+            gateOptionButtonImages.Add(gate.GetComponentInChildren<Image>());
             gates gateType = gateOptions[i].gateType;
             int a = i;
             gateOptioonButtons[i].onClick.AddListener(() => { GateOptionButtonClicked(gateType, a); });
@@ -175,6 +178,12 @@ public class CircuitCreator : CircuitCreation
 
     private void GateOptionButtonClicked(gates gateType, int i)
     {
+        // Don't allow selection if no gates of this type are available
+        if (gateOptions[i].amount <= 0)
+        {
+            return;
+        }
+
         for (int j = 0; j < gateOptioonButtons.Count; j++)
         {
             gateOptionButtonImages[j].color = normalcolor;
@@ -185,7 +194,7 @@ public class CircuitCreator : CircuitCreation
             selectedGateType = gateType;
             selectedGateIndex = i;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
 
@@ -193,7 +202,7 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayGateDeSelected();
             gateMode = false;
-            gateOptioonButtons[i].GetComponent<Image>().color = normalcolor;
+            gateOptionButtonImages[i].color = normalcolor;
             return;
         }
 
@@ -201,8 +210,9 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayGateSelected();
             selectedGateType = gateType;
+            selectedGateIndex = i;
             gateMode = true;
-            gateOptioonButtons[i].GetComponent<Image>().color = clickedcolor;
+            gateOptionButtonImages[i].color = clickedcolor;
             return;
         }
     }
@@ -337,6 +347,8 @@ public class CircuitCreator : CircuitCreation
         asset.cellSize = cellSize;
         asset.rows = gridCells.Count;
         asset.cols = gridCells[0].Count;
+        // Default new runtime levels to last by priority
+        asset.priority = 1_000_000f;
 
         for (int i = 0; i < gridCells.Count; i++)
         {
@@ -398,12 +410,71 @@ public class CircuitCreator : CircuitCreation
             Directory.CreateDirectory(directory);
         }
 
-        string path = Path.Combine(directory, fileName + ".json");
+        // Create unique, numbered filename so levels are discoverable and ordered (global max across StreamingAssets and runtime dirs)
+        int maxIndex = -1;
+        int ExtractNum(string name)
+        {
+            string[] parts = name.Split(' ');
+            if (parts.Length > 1)
+            {
+                int num;
+                if (int.TryParse(parts[parts.Length - 1], out num))
+                    return num;
+            }
+            return -1;
+        }
+
+        try
+        {
+            // StreamingAssets
+            string streamingDir = Path.Combine(Application.streamingAssetsPath, "Levels");
+            if (Directory.Exists(streamingDir))
+            {
+                foreach (var f in Directory.GetFiles(streamingDir, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+
+            // Runtime (legacy)
+            string legacyDir = Path.Combine(Application.persistentDataPath, "LevelSaveSO");
+            if (Directory.Exists(legacyDir))
+            {
+                foreach (var f in Directory.GetFiles(legacyDir, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+
+            // Runtime (current)
+            if (Directory.Exists(directory))
+            {
+                foreach (var f in Directory.GetFiles(directory, "*.json"))
+                {
+                    int n = ExtractNum(Path.GetFileNameWithoutExtension(f));
+                    if (n > maxIndex) maxIndex = n;
+                }
+            }
+        }
+        catch { }
+
+        int nextIndex = maxIndex + 1;
+
+        string path = Path.Combine(directory, $"Level {nextIndex}.json");
 
         string json = JsonUtility.ToJson(asset, true);
-        File.WriteAllText(path, json);
-
-        Debug.Log($"[RUNTIME] Saved LevelSaveSO to {path}");
+        try
+        {
+            File.WriteAllText(path, json);
+            bool exists = File.Exists(path);
+            Debug.Log($"[RUNTIME] Save folder: {directory}\nSaved Level: {path}\nExists after write: {exists}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[RUNTIME] Failed to save level to {path}: {ex}");
+        }
 #endif
     }
 
@@ -789,8 +860,11 @@ public class CircuitCreator : CircuitCreation
     }
     public override void MakeGate(Cell cell)
     {
+        Debug.Log($"[CircuitCreator] Attempting to place gate on cell. IsGate: {cell.isGate}, IsSource: {cell.isSource}");
+        
         if (cell.isGate)
         {
+            Debug.Log($"[CircuitCreator] Cell already has a gate. Rotating existing gate.");
             cell.outputDir++;
             cell.outputDir %= 4;
             cell.gateGameobject.transform.eulerAngles = cell.gateGameobject.transform.eulerAngles + new Vector3(0, 0, 90);
@@ -802,10 +876,12 @@ public class CircuitCreator : CircuitCreation
         }
         if (gateOptions[selectedGateIndex].amount <= 0)
         {
+            Debug.LogWarning($"[CircuitCreator] No gates of type {selectedGateType} available! Amount: {gateOptions[selectedGateIndex].amount}");
             return;
         }
         if (!cell.isGate)
         {
+            Debug.Log($"[CircuitCreator] Successfully placing {selectedGateType} gate!");
             cell.isGate = true;
             cell.gate = selectedGateType;
             cell.outputDir = 0;
@@ -817,6 +893,10 @@ public class CircuitCreator : CircuitCreation
 
 
             AudioManager.Instance.PlayGatePlaced();
+        }
+        else
+        {
+            Debug.LogWarning($"[CircuitCreator] Cell already has a gate but we're trying to place another one!");
         }
     }
     public override void RemoveGate(Cell cell)
@@ -987,6 +1067,12 @@ public class CircuitCreator : CircuitCreation
         {
             AudioManager.Instance.PlayClick0();
         }
+    }
+
+    // Expose a button-callable save for builds
+    public void SaveLevelRuntime()
+    {
+        CreateNewLevelSaveSO();
     }
 
 }

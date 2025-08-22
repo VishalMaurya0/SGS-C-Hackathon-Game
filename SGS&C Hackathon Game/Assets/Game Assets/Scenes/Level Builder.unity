@@ -1480,7 +1480,6 @@ MonoBehaviour:
   ButtonPrefab: {fileID: 0}
   levelButtons: []
   noOfLevels: 0
-  saveFolder: Assets/Game Assets/LevelSaveSO
   rowDropdown: {fileID: 0}
   colDropdown: {fileID: 0}
 --- !u!1 &1128224451
@@ -2775,11 +2774,13 @@ MonoBehaviour:
   currentDir: 0
   selectedGateType: 0
   selectedGateIndex: 0
-  clickedcolor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
-  normalcolor: {r: 0.8443396, g: 0.8443396, b: 0.8443396, a: 1}
+  clickedcolor: {r: 0.3915094, g: 0.3915094, b: 0.3915094, a: 1}
+  normalcolor: {r: 1, g: 1, b: 1, a: 1}
   inputContainer: {fileID: 256386939}
   outputContainer: {fileID: 0}
   saveFolder: Assets/Game Assets/LevelSaveSO
+  runtimeSaveFolder: LevelSaves
+  fileName: LevelSaveSO
 --- !u!1 &1950633614
 GameObject:
   m_ObjectHideFlags: 0

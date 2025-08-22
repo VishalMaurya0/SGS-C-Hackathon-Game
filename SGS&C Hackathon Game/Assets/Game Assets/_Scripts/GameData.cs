@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,10 +15,42 @@ public class GameData : MonoBehaviour
 
     [Header("Info")]
     public int LevelClicked = 0;
+    public int noOfLevels;
     public int GameType = 0;
     public int row = 6;
     public int col = 10;
 
+    [Header("Level Completion Tracking")]
+    public Dictionary<int, bool> easyModeCompleted = new();
+    public Dictionary<int, bool> hardModeCompleted = new();
+    public int learnings = 0; 
+
+    [Header("Feedback")]
+    public GameObject FeedbackPanel;
+    public Coroutine feedbackCoroutine;
+    public TMP_Text LearningsText;
+    public bool gameStarted;
+
+    [Header("Periodic Feedback")]
+    public List<string> periodicFeedbackMessages = new List<string>
+    {
+        "You're doing great!",
+        "You've got this!",
+        "Almost there!",
+        "Stay focused!",
+        "You're on fire! Keep Thinking!",
+        "Amazing progress! Keep going!",
+        "You're getting better! Keep going!",
+        "You can Rotate The Gate by selecting the gate and clicking on the cell",
+        "You can Remove The Gate by Right Clicking",
+        "You can Make Your Own Levels in the Explore Mode",
+        "Click on the Gate to Rotate the Output",
+        "Newly Placed Gate Will Always Have the output in the Right Dir if Wire Connected",
+        "You can Learn The Controls in the HELP Section",
+        "The RightMost Column Should match Output Column",
+    };
+    private Coroutine periodicFeedbackCoroutine;
+    private float lastPeriodicFeedbackTime;
 
     public AudioClip MenuMusic;
     public AudioClip GameMusic;
@@ -31,6 +65,8 @@ public class GameData : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        // Keep UI references fresh on scene changes
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Only initialize once
         if (gatesToExplain.Count == 0)
@@ -41,12 +77,265 @@ public class GameData : MonoBehaviour
             }
         }
 
-        //if (SceneManager.GetActiveScene().name == "Main Menu") TODO
-        //{
-        //    AudioManager.Instance.PlayMusic(MenuMusic);
-        //}else
-        //{
-        //    AudioManager.Instance.PlayMusic(GameMusic);
-        //}
+        // Load completion data
+        LoadCompletionData();
+
+        if (SceneManager.GetActiveScene().name == "Main Menu")
+        {
+            //AudioManager.Instance.PlayMusic(MenuMusic);
+        }else
+        {
+            //AudioManager.Instance.PlayMusic(GameMusic);
+        }
+
+        if (LearningsText != null)
+        {   
+            LearningsText.text = $"Learnings: {learnings}";
+        }
+
+        // Try to bind the FeedbackPanel in the current scene (works even if it's inactive)
+        if (FeedbackPanel == null)
+        {
+            FeedbackPanel = FindFeedbackPanelInActiveScene();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Refresh reference after every scene load
+        FeedbackPanel = FindFeedbackPanelInActiveScene();
+    }
+
+    private GameObject FindFeedbackPanelInActiveScene()
+    {
+        // 1) Try active objects by tag
+        var go = GameObject.FindWithTag("FeedBack");
+        if (go != null) return go;
+
+        // 2) Include inactive scene objects as well
+        foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
+        {
+            if (t != null && t.CompareTag("FeedBack") && t.gameObject.scene.IsValid() && t.gameObject.scene == SceneManager.GetActiveScene())
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
+    }
+
+    public void StartPeriodicFeedback()
+    {
+        if (periodicFeedbackCoroutine != null)
+        {
+            StopCoroutine(periodicFeedbackCoroutine);
+        }
+        periodicFeedbackCoroutine = StartCoroutine(PeriodicFeedbackRoutine());
+    }
+
+    public void StopPeriodicFeedback()
+    {
+        if (periodicFeedbackCoroutine != null)
+        {
+            StopCoroutine(periodicFeedbackCoroutine);
+            periodicFeedbackCoroutine = null;
+        }
+    }
+
+    private IEnumerator PeriodicFeedbackRoutine()
+    {
+        while (true)
+        {
+            // Wait for a random time between 25-50 seconds
+            float waitTime = UnityEngine.Random.Range(25f, 50f);
+            yield return new WaitForSeconds(waitTime);
+            
+            // Only show feedback if we're in a game scene and no other feedback is showing
+            if (SceneManager.GetActiveScene().name == "0" && feedbackCoroutine == null)
+            {
+                string randomMessage = periodicFeedbackMessages[UnityEngine.Random.Range(0, periodicFeedbackMessages.Count)];
+                ShowFeedback(randomMessage, false);
+            }
+        }
+    }
+
+    public void ShowFeedback(string feedback, bool won, bool forced = false)
+    {
+        if (feedbackCoroutine != null && !forced)
+        {
+            return;
+        }
+
+        if (feedbackCoroutine != null && forced)
+        {
+            StopCoroutine(feedbackCoroutine);
+        }
+
+        if (FeedbackPanel == null)
+        {
+            FeedbackPanel = FindFeedbackPanelInActiveScene();
+        }
+
+        if (FeedbackPanel == null)
+        {
+            Debug.LogWarning("[GameData] FeedbackPanel with tag 'FeedBack' not found in the active scene. Ensure it's tagged correctly and exists in this scene.");
+            return;
+        }
+
+        FeedbackPanel.SetActive(true);
+        FeedbackPanel.GetComponentInChildren<TMP_Text>().text = feedback;
+        int childCount = FeedbackPanel.transform.childCount - 1;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            FeedbackPanel.transform.GetChild(i).gameObject.SetActive(false);
+        }
+
+        int randomIndex = UnityEngine.Random.Range(1, childCount);
+        if (won) randomIndex = 0;
+        FeedbackPanel.transform.GetChild(randomIndex).gameObject.SetActive(true);
+
+        feedbackCoroutine = StartCoroutine(HideFeedbackAfterDelay(randomIndex));
+    }
+
+    private IEnumerator HideFeedbackAfterDelay(int randomIndex)
+    {
+        yield return new WaitForSeconds(3f);
+        FeedbackPanel.transform.GetChild(randomIndex).gameObject.SetActive(false);
+        FeedbackPanel.SetActive(false);
+        feedbackCoroutine = null;
+    }
+
+
+    // Mark level as completed for the current game type
+    public void MarkLevelCompleted(int levelIndex)
+    {
+        // Was this level already solved in any mode before this call?
+        bool wasSolved =
+            (easyModeCompleted.ContainsKey(levelIndex) && easyModeCompleted[levelIndex]) ||
+            (hardModeCompleted.ContainsKey(levelIndex) && hardModeCompleted[levelIndex]);
+
+        if (GameType == 0) // Easy mode
+        {
+            easyModeCompleted[levelIndex] = true;
+        }
+        else if (GameType == 1) // Hard mode
+        {
+            hardModeCompleted[levelIndex] = true;
+        }
+
+        // If it was not solved before and now it is solved in at least one mode, increment learnings
+        bool nowSolved =
+            (easyModeCompleted.ContainsKey(levelIndex) && easyModeCompleted[levelIndex]) ||
+            (hardModeCompleted.ContainsKey(levelIndex) && hardModeCompleted[levelIndex]);
+        if (!wasSolved && nowSolved)
+        {
+            learnings++;
+            LearningsText.text = $"Learnings: {learnings}";
+        }
+
+        // Save completion data immediately
+        SaveCompletionData();
+    }
+
+    // Check if level is completed for the current game type
+    public bool IsLevelCompleted(int levelIndex)
+    {
+        if (GameType == 0) // Easy mode
+        {
+            return easyModeCompleted.ContainsKey(levelIndex) && easyModeCompleted[levelIndex];
+        }
+        else if (GameType == 1) // Hard mode
+        {
+            return hardModeCompleted.ContainsKey(levelIndex) && hardModeCompleted[levelIndex];
+        }
+        return false;
+    }
+
+    // Get completion status for both modes
+    public (bool easy, bool hard) GetLevelCompletionStatus(int levelIndex)
+    {
+        bool easyCompleted = easyModeCompleted.ContainsKey(levelIndex) && easyModeCompleted[levelIndex];
+        bool hardCompleted = hardModeCompleted.ContainsKey(levelIndex) && hardModeCompleted[levelIndex];
+        return (easyCompleted, hardCompleted);
+    }
+
+    // Save completion data to PlayerPrefs
+    public void SaveCompletionData()
+    {
+        // Save easy mode completions
+        string easyData = "";
+        foreach (var kvp in easyModeCompleted)
+        {
+            if (kvp.Value) // Only save completed levels
+            {
+                easyData += kvp.Key + ",";
+            }
+        }
+        PlayerPrefs.SetString("EasyModeCompleted", easyData);
+
+        // Save hard mode completions
+        string hardData = "";
+        foreach (var kvp in hardModeCompleted)
+        {
+            if (kvp.Value) // Only save completed levels
+            {
+                hardData += kvp.Key + ",";
+            }
+        }
+        PlayerPrefs.SetString("HardModeCompleted", hardData);
+
+        // Persist learnings as well (redundant but handy for analytics/UI)
+        PlayerPrefs.SetInt("Learnings", learnings);
+
+        PlayerPrefs.Save();
+    }
+
+    // Load completion data from PlayerPrefs
+    private void LoadCompletionData()
+    {
+        easyModeCompleted.Clear();
+        hardModeCompleted.Clear();
+
+        // Load easy mode completions
+        string easyData = PlayerPrefs.GetString("EasyModeCompleted", "");
+        if (!string.IsNullOrEmpty(easyData))
+        {
+            string[] levels = easyData.Split(',');
+            foreach (string level in levels)
+            {
+                if (int.TryParse(level, out int levelIndex))
+                {
+                    easyModeCompleted[levelIndex] = true;
+                }
+            }
+        }
+
+        // Load hard mode completions
+        string hardData = PlayerPrefs.GetString("HardModeCompleted", "");
+        if (!string.IsNullOrEmpty(hardData))
+        {
+            string[] levels = hardData.Split(',');
+            foreach (string level in levels)
+            {
+                if (int.TryParse(level, out int levelIndex))
+                {
+                    hardModeCompleted[levelIndex] = true;
+                }
+            }
+        }
+
+        // Recompute learnings from union of solved levels across modes
+        var uniqueSolved = new System.Collections.Generic.HashSet<int>();
+        foreach (var kvp in easyModeCompleted) if (kvp.Value) uniqueSolved.Add(kvp.Key);
+        foreach (var kvp in hardModeCompleted) if (kvp.Value) uniqueSolved.Add(kvp.Key);
+        learnings = uniqueSolved.Count;
     }
 }

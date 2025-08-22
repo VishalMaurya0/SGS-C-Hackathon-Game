@@ -4,8 +4,12 @@
 TagManager:
   serializedVersion: 3
   tags:
+<<<<<<< HEAD
   - burner
   - Sphere
+=======
+  - FeedBack
+>>>>>>> origin/Vishal-Changes
   layers:
   - Default
   - TransparentFX
