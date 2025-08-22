@@ -17,8 +17,9 @@ public class ChemicalSpawner : MonoBehaviour
     [Header("Temperature Settings")]
     public TextMeshProUGUI temperatureText;
     public float temperatureC = 30f;  
-    public float temperatureIncreaseStep = 5f; 
-
+    public float temperatureIncreaseStep = 5f;
+    GameObject temp;
+    public static bool yes = false;
     private GameObject currentChemical;
     private bool isPlacing = false;
     private bool started = false;
@@ -35,7 +36,8 @@ public class ChemicalSpawner : MonoBehaviour
     public float maxEmissionRate = 50f;     // heavy steam at boiling
     public float boilPointC = 100f;         // start maxing here
     public GameObject pl3;
- 
+    public AudioClip myClip;
+    public AudioClip MyClip;
     void UpdateSteamEffect()
     {
         var emission = steamParticles.emission;
@@ -82,27 +84,34 @@ public class ChemicalSpawner : MonoBehaviour
                 {
                 SpawnChemical();
     pl3.SetActive(true);
-                    Destroy(j.collider.gameObject);
-}
-if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
+                Destroy(j.collider.gameObject);
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
+            }
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
 {
                 // snap to fixed burner point
-
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
                 currentChemical.transform.position = new Vector3(-3.43f, 4.77f, -2.29f);
                 g4.SetActive(true);
                 g5.SetActive(true);
                 currentChemical = null;
                 isPlacing = false;
+                temp = new GameObject("TempAudio");
+                AudioSource src = temp.AddComponent<AudioSource>();
+                src.clip = MyClip;
+                src.Play();
             }
-         
 
-if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
+
+            if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
 {
-
-    Methodology.SetActive(true);
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
+                Methodology.SetActive(true);
 }
-            if(Physics.Raycast(ray, out RaycastHit l, 100f, burnerLayer) && currentChemical == null){
+            if(Physics.Raycast(ray, out RaycastHit l, 100f, burnerLayer) && currentChemical == null)
+            {
                 IncreaseTemperature();
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
             }
         }
     }
@@ -138,15 +147,23 @@ if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
     {
         started = true;
         g3 = GameObject.FindGameObjectWithTag("Sphere");
+        
         yield return new WaitForSeconds(5f);
         g3.SetActive(false);
         yield return new WaitForSeconds(5f);
         g1.SetActive(false);
         g2.SetActive(true);
+        Destroy(temp);
+        
 
     }
     public void Load()
     {
+        if (!yes)
+        {
+            MainMenui.reactions += 1;
+            yes = true;
+        }
         SceneManager.LoadScene("MainMenu");
     }
 }

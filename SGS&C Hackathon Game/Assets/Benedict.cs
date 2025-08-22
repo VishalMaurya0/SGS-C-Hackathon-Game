@@ -17,6 +17,7 @@ public class Benedict : MonoBehaviour
     public LayerMask Benedictt;
     public LayerMask Sugar;
     int i = 0;
+    public static bool yes = false;
     [Header("Temperature Settings")]
     public TextMeshProUGUI temperatureText;
     public float temperatureC = 30f;
@@ -37,6 +38,10 @@ public class Benedict : MonoBehaviour
     public GameObject pl1;
     public GameObject pl3;
     public GameObject Methodology;
+    public AudioClip myClip;
+    public AudioClip MyClip;
+    GameObject temp;
+
     public void SpawnChemicalA()
     {
         SpawnChemical(chemicalPrefabA, true);
@@ -81,6 +86,7 @@ public class Benedict : MonoBehaviour
             {
                 if (Physics.Raycast(ray, out RaycastHit j, 100f, Benedictt))
                 {
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     SpawnChemicalA();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
@@ -88,7 +94,7 @@ public class Benedict : MonoBehaviour
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
-
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     currentChemical.transform.position = new Vector3(-3.43f, 4.77f, -2.29f);
                     i = 1;
                     pl1.SetActive(true);
@@ -101,6 +107,7 @@ public class Benedict : MonoBehaviour
             {
                 if (Physics.Raycast(ray, out RaycastHit j, 100f, Sugar))
                 {
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     SpawnChemicalB();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
@@ -108,7 +115,7 @@ public class Benedict : MonoBehaviour
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
-
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     currentChemical.transform.position = new Vector3(-3.43f, 5f, -2.29f);
                     currentChemical.AddComponent<Rigidbody>();
                     StartCoroutine(Owarida());
@@ -120,11 +127,12 @@ public class Benedict : MonoBehaviour
             }
             if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
             {
-
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
                 Methodology.SetActive(true);
             }
             if (Physics.Raycast(ray, out RaycastHit l, 100f, burnerLayer) && i==1)
             {
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
                 IncreaseTemperature();
             }
 
@@ -177,6 +185,7 @@ public class Benedict : MonoBehaviour
         yield return new WaitForSeconds(3f);
         g1.SetActive(false);
         g2.SetActive(true);
+        Destroy(temp);
         if (temperatureC > 75f)
         {
             feedback.text = "Feedback: Try to maintain the temperature closer to 65C";
@@ -189,6 +198,11 @@ public class Benedict : MonoBehaviour
 
     public void Load()
     {
+        if (!yes)
+        {
+            yes = true;
+            MainMenui.reactions += 1;
+        }
         SceneManager.LoadScene("MainMenu");
     }
 }

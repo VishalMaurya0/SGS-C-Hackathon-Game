@@ -6,4 +6,8 @@ public class MainMainMenu : MonoBehaviour
     {
         SceneManager.LoadScene(j);
     }
+    public void Done()
+    {
+        Application.Quit();
+    }
 }

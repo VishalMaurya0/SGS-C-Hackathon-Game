@@ -21,6 +21,11 @@ public class FlameSpawner : MonoBehaviour
     public GameObject g1;
     public GameObject g2;
     public GameObject g3;
+    public static bool yes1;
+    public static bool yes2;
+    public static bool yes3;
+    public static bool yes4;
+    public static bool yes5;
 
     public GameObject g4;
     public GameObject g5;
@@ -168,6 +173,31 @@ public class FlameSpawner : MonoBehaviour
     }
     public void Mainmenu()
     {
+        if (SceneManager.GetActiveScene().name == "Lithium" && !yes1)
+        {
+            yes1 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Magnesium" && !yes2)
+        {
+            yes2 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Barium" && !yes3)
+        {
+            yes3 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "SodiumF" && !yes4)
+        {
+            yes4 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Potassium" && !yes5)
+        {
+            yes5 = true;
+            MainMenui.reactions += 1;
+        }
         SceneManager.LoadScene("MainMenu");
     }
 }

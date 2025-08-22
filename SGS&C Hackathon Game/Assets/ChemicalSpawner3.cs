@@ -23,13 +23,18 @@ public class ChemicalSpawner3 : MonoBehaviour
     public GameObject g2;
 
     public Transform tr;
-  
+    public static bool yes1;
+    public static bool yes2;
+    public static bool yes3;
+    public static bool yes4;
 
     public GameObject g5;
     public GameObject pl1;
     public GameObject Methodology;
     public AudioClip myClip;
     public GameObject pl3;
+    public AudioClip MyClip;
+
     void Start()
     {
       
@@ -77,6 +82,7 @@ public class ChemicalSpawner3 : MonoBehaviour
                     SpawnChemicalA();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                 }
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null)
                 {
@@ -88,6 +94,7 @@ public class ChemicalSpawner3 : MonoBehaviour
                     pl3.SetActive(false);
                     currentChemical = null;
                     isPlacing = false;
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                 }
             }
             else
@@ -97,6 +104,7 @@ public class ChemicalSpawner3 : MonoBehaviour
                     SpawnChemicalB();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                 }
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
@@ -107,14 +115,16 @@ public class ChemicalSpawner3 : MonoBehaviour
                     StartCoroutine(Owarida());
                     pl3.SetActive(false);
                     isPlacing = false;
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                 }
             }
             if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
             {
-                
+
                 Methodology.SetActive(true);
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
             }
-            
+
         }
     }
 
@@ -141,14 +151,36 @@ public class ChemicalSpawner3 : MonoBehaviour
     IEnumerator Owarida()
     {
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
 
-        yield return new WaitForSeconds(15f);
+        AudioSource.PlayClipAtPoint(MyClip, transform.position);
+        yield return new WaitForSeconds(9f);
         g1.SetActive(false);
         g2.SetActive(true);
     }
     public void Load()
     {
+        if (SceneManager.GetActiveScene().name == "Displacement1" && !yes1)
+        {
+            yes1 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Displacement2" && !yes2)
+        {
+            yes2 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Displacement3" && !yes3)
+        {
+            yes3 = true;
+            MainMenui.reactions += 1;
+        }
+        if (SceneManager.GetActiveScene().name == "Displacement4" && !yes4)
+        {
+            yes4 = true;
+            MainMenui.reactions += 1;
+        }
+        
         SceneManager.LoadScene("MainMenu");
     }
 }

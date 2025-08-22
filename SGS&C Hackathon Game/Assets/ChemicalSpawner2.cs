@@ -19,7 +19,8 @@ public class ChemicalSpawner2 : MonoBehaviour
     private GameObject currentChemical;
     private bool isPlacing = false;
     private bool spawnAtMouse = true;
-    int i=0;
+    int i = 0;
+    public static bool yes = false;
     public TextMeshProUGUI feedback;
     public GameObject g1;
     public GameObject g2;
@@ -28,9 +29,12 @@ public class ChemicalSpawner2 : MonoBehaviour
     public GameObject g5;
     public GameObject Methodology;
     public GameObject pl1;
+    public AudioClip MyClip;
     public GameObject pl3;
     public float timer = 0f;
-    bool ok=false;
+    bool ok = false;
+    public AudioClip myClip;
+
     void Start()
     {
         // no temperature or slider setup needed
@@ -74,6 +78,7 @@ public class ChemicalSpawner2 : MonoBehaviour
             {
                 if (Physics.Raycast(ray, out RaycastHit j, 100f, Water))
                 {
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     SpawnChemicalA();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
@@ -81,7 +86,7 @@ public class ChemicalSpawner2 : MonoBehaviour
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, burnerLayer) && isPlacing && currentChemical != null) 
                 {
                     // snap to fixed burner point
-
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     currentChemical.transform.position = new Vector3(-0.4098189f, 3.182409f, -2.385961f);
                     i = 1;
                     pl1.SetActive(true);
@@ -94,6 +99,7 @@ public class ChemicalSpawner2 : MonoBehaviour
             {
                 if (Physics.Raycast(ray, out RaycastHit j, 100f, sodium))
                 {
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     SpawnChemicalB();
                     pl3.SetActive(true);
                     Destroy(j.collider.gameObject);
@@ -102,7 +108,7 @@ public class ChemicalSpawner2 : MonoBehaviour
                 if (Physics.Raycast(ray, out RaycastHit hit, 100f, hlayer) && isPlacing && currentChemical != null)
                 {
                     // snap to fixed burner point
-
+                    AudioSource.PlayClipAtPoint(myClip, transform.position);
                     currentChemical.transform.position = new Vector3(-0.4098189f, 5.182409f, -2.385961f);
                     currentChemical.AddComponent<Rigidbody>();
                     StartCoroutine(Owarida());
@@ -113,7 +119,7 @@ public class ChemicalSpawner2 : MonoBehaviour
             }
             if (Physics.Raycast(ray, out RaycastHit k, 100f, BlackBoard))
             {
-
+                AudioSource.PlayClipAtPoint(myClip, transform.position);
                 Methodology.SetActive(true);
             }
         }
@@ -145,9 +151,12 @@ public class ChemicalSpawner2 : MonoBehaviour
     IEnumerator Owarida()
     {
 
-        yield return new WaitForSeconds(8f);
-
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
+        GameObject temp = new GameObject("TempAudio");
+        AudioSource src = temp.AddComponent<AudioSource>();
+        src.clip = MyClip;
+        src.Play();
+        yield return new WaitForSeconds(9f);
         if (timer > 5f)
         {
             feedback.text = "Feedback: Since sodium reacts with air, try not to expose sodium for long time.";
@@ -160,9 +169,15 @@ public class ChemicalSpawner2 : MonoBehaviour
             Destroy(currentChemical);
         g1.SetActive(false);
         g2.SetActive(true);
+        Destroy(temp);
     }
     public void Load()
     {
+        if (!yes)
+        {
+            yes = true;
+            MainMenui.reactions += 1;
+        }
         SceneManager.LoadScene("MainMenu");
     }
 
